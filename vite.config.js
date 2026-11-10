@@ -1,3 +1,16 @@
 import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
-export default defineConfig({ plugins: [tailwindcss()], clearScreen: false, server: { port: 1420, strictPort: true }, build: { outDir: 'dist' }, envPrefix: ['VITE_', 'TAURI_ENV_'] });
+
+export default defineConfig({
+  plugins: [tailwindcss()],
+  clearScreen: false,
+  server: {
+    port: 1420,
+    strictPort: true,
+    watch: {
+      ignored: ['**/src-tauri/target/**', '**/service-daemon/target/**', '**/.tools/**', '**/archive/**'],
+    },
+  },
+  build: { outDir: 'dist' },
+  envPrefix: ['VITE_', 'TAURI_ENV_'],
+});
