@@ -4,7 +4,7 @@
 
 ## Download and try it
 
-The [latest experimental release](https://github.com/elvys9/aegis-security/releases) includes a Windows 10/11 x64 NSIS installer. The installer is **unsigned**. Test it in a disposable VM with a snapshot first.
+The [latest experimental release](https://github.com/elvys9/agis-security/releases) includes a Windows 10/11 x64 NSIS installer. The installer is **unsigned**. Test it in a disposable VM with a snapshot first.
 
 1. Download the installer from the release's **Assets** section.
 2. Run setup; UAC is required for installation and removal. WebView2 may be downloaded if it is not already installed.
