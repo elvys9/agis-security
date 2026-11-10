@@ -1,13 +1,14 @@
 {
-    "name":  "static-guard-desktop",
-    "version":  "0.1.0",
+    "name":  "aegis-security-desktop",
+    "version":  "0.1.1",
     "private":  true,
     "type":  "module",
     "scripts":  {
                     "dev":  "vite --host 127.0.0.1 --port 1420 --strictPort",
                     "build":  "vite build",
                     "preview":  "vite preview",
-                    "tauri":  "node installer/tauri-cli.mjs"
+                    "tauri":  "node installer/tauri-cli.mjs",
+                    "test:i18n": "node --test src/i18n.test.mjs"
                 },
     "dependencies":  {
                          "react":  "19.3.1",

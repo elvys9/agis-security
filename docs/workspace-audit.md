@@ -1,23 +1,22 @@
-# Audit e pulizia del workspace
+# Workspace audit
 
-L'albero precedente C++/WPF/React dimostrativo è stato archiviato in `archive/pre-tauri-source.zip`: 47 file sorgente/documentazione confrontati tramite SHA-256 prima della rimozione. Sono stati rimossi dalla radice `gui-client/`, `core-service/`, `kernel-drivers/`, `shared-ipc/`, il vecchio `CMakeLists.txt`, `docs/gui-implementation-plan.md` e `build/` generata. Sono stati sostituiti README, documentazione CMake e task VS Code non più applicabili. Non sono stati cancellati test o dati utente del vault.
+Before the Tauri migration, the C++/WPF/React demonstration was copied to a **local-only** \`archive/pre-tauri-source.zip\`. Forty-seven source/documentation files were compared by SHA-256 before the old directories were removed. The archive is intentionally excluded from GitHub. The obsolete \`gui-client/\`, \`core-service/\`, \`kernel-drivers/\`, \`shared-ipc/\`, root CMake file, old GUI plan, and generated \`build/\` were removed. README, CMake-era testing instructions, and the VS Code task were replaced for the native Tauri project. User vault data and regression tests were not deleted.
 
-```text
+~~~text
 .
-├── .vscode/             task Tauri dev/build
-├── archive/             copia verificata del prototipo precedente
-├── docs/                architettura, test, distribuzione, audit
-├── installer/           hook NSIS, provisioning ACL, script build
-├── service-daemon/      servizio SCM opzionale e test
-├── signatures/          definizioni iniziali di autotest
-├── src/                 GUI React/Tailwind
-├── src-tauri/           backend Rust e configurazione Tauri v2
+├── .vscode/             Tauri development/build tasks
+├── docs/                architecture, testing, distribution, audit
+├── installer/           NSIS hooks, ACL provisioning, build wrapper
+├── service-daemon/      optional SCM service and tests
+├── signatures/          integration-test definitions
+├── src/                 React UI and six-language translations
+├── src-tauri/           Rust backend and Tauri v2 configuration
 ├── index.html
 ├── package-lock.json
 ├── package.json
 └── vite.config.js
-```
+~~~
 
-`.tools/`, `node_modules/`, `dist/` e i `target/` sono output locali ignorati; restano durante compilazione/test perché servono al ciclo di sviluppo. Il progetto non è un repository Git in questa directory, quindi `git status` non è disponibile.
+\`.tools/\`, \`node_modules/\`, \`dist/\`, \`archive/\`, \`src-tauri/gen/\`, and Cargo \`target/\` trees are ignored local/generated directories. They may remain on a development machine because they support builds and testing.
 
-> [Self-Check] Nessun parser PE, YARA o operazione di scansione è spostato nel renderer. Lo scanner limita worker e code; il servizio privilegiato è separato e non viene installato implicitamente. Il vault è autenticato e non apre/esegue i file isolati dalla GUI. I limiti di sicurezza e le funzioni mancanti sono descritti senza dichiararle implementate.
+> [Self-Check] PE parsing, YARA, and scanning remain outside the renderer. The scanner bounds workers and queues; the privileged optional service is not silently installed. Vault entries are never opened or executed by the GUI. Unsupported protections are identified as missing rather than represented by empty modules.

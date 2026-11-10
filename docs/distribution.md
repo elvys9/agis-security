@@ -1,4 +1,4 @@
-# Windows distribution: Aegis Security 0.1.0
+# Windows distribution: Aegis Security 0.1.1
 
 This is an **unsigned prerelease**, not a certified antivirus or a public-production release. The supported packaging path is NSIS for Windows 10/11 x64. No installer is executed by the build workflow.
 

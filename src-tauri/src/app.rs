@@ -15,12 +15,25 @@ struct Progress { id: String, kind: String, status: String, files: u64, total: u
 impl Default for Progress { fn default() -> Self { Self { id: String::new(), kind: "quick".into(), status: "idle".into(), files: 0, total: 0, rate: 0.0, path: String::new(), errors: 0, incomplete: 0, found: 0 } } }
 #[derive(Clone, Serialize)]
 struct Status { version: &'static str, watcher_enabled: bool, definitions_version: u64, update_configured: bool, workers: usize, vault_path: String, warnings: Vec<String> }
+struct TrayMenu { show: tauri::menu::MenuItem<tauri::Wry>, quit: tauri::menu::MenuItem<tauri::Wry> }
+struct NativeText { show: &'static str, quit: &'static str, tooltip: &'static str, alert: &'static str, review: &'static str }
+fn native_text(language: &str) -> NativeText {
+    match language {
+        "it" => NativeText { show: "Apri Aegis Security", quit: "Esci e interrompi il monitoraggio", tooltip: "Aegis Security · monitoraggio user-mode", alert: "Aegis Security · rilevamento", review: "richiede verifica. Nessuna quarantena automatica." },
+        "fr" => NativeText { show: "Ouvrir Aegis Security", quit: "Quitter et arrêter la surveillance", tooltip: "Aegis Security · surveillance utilisateur", alert: "Aegis Security · détection", review: "à vérifier. Aucune mise en quarantaine automatique." },
+        "de" => NativeText { show: "Aegis Security öffnen", quit: "Beenden und Überwachung stoppen", tooltip: "Aegis Security · Benutzerüberwachung", alert: "Aegis Security · Fund", review: "muss geprüft werden. Keine automatische Quarantäne." },
+        "zh-CN" => NativeText { show: "打开 Aegis Security", quit: "退出并停止监控", tooltip: "Aegis Security · 用户模式监控", alert: "Aegis Security · 检测结果", review: "需要复核。不会自动隔离。" },
+        "ru" => NativeText { show: "Открыть Aegis Security", quit: "Выйти и остановить мониторинг", tooltip: "Aegis Security · мониторинг пользователя", alert: "Aegis Security · обнаружение", review: "требует проверки. Автоматического карантина нет." },
+        _ => NativeText { show: "Open Aegis Security", quit: "Exit and stop monitoring", tooltip: "Aegis Security · user-mode monitoring", alert: "Aegis Security · detection", review: "needs review. No automatic quarantine." },
+    }
+}
 struct Engine {
     root: PathBuf, defs: RwLock<Arc<Definitions>>, vault: Mutex<Vault>, progress: Mutex<Progress>,
     findings: Mutex<HashMap<String, Finding>>, cancel: AtomicBool, paused: AtomicBool, active: AtomicBool,
     watching: AtomicBool, watcher: Mutex<Option<watcher::WatcherHandle>>, workers: usize,
     last_event: Mutex<Instant>, shutdown: AtomicBool,
     updates: Mutex<()>, watcher_incomplete: AtomicU64, last_health: Mutex<Instant>,
+    ui_language: Mutex<String>, tray_menu: Mutex<Option<TrayMenu>>,
 }
 type Shared = Arc<Engine>;
 fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> { mutex.lock().unwrap_or_else(|poisoned| poisoned.into_inner()) }
@@ -46,10 +59,25 @@ fn record(app: &tauri::AppHandle, engine: &Engine, path: &std::path::Path, resul
     findings.insert(finding.id.clone(), finding.clone()); drop(findings);
     if watched {
         let _ = app.emit("watcher-alert", &finding);
-        let _ = app.notification().builder().title("Aegis Security · rilevamento").body(format!("{}: richiede verifica. Nessuna quarantena automatica.", finding.name)).show();
+        let language = lock(&engine.ui_language).clone();
+        let words = native_text(&language);
+        let _ = app.notification().builder().title(words.alert).body(format!("{}: {}", finding.name, words.review)).show();
     } else { let mut p = lock(&engine.progress); p.found += 1; drop(p); let _ = app.emit("scan-finding", &finding); }
 }
 #[tauri::command] fn get_status(engine: tauri::State<'_, Shared>) -> Status { status(&engine) }
+#[tauri::command] fn set_ui_language(language: String, app: tauri::AppHandle, engine: tauri::State<'_, Shared>) -> Result<(), String> {
+    if !["en", "it", "fr", "de", "zh-CN", "ru"].contains(&language.as_str()) { return Err("Unsupported language".into()); }
+    let words = native_text(&language);
+    if let Some(menu) = lock(&engine.tray_menu).as_ref() {
+        menu.show.set_text(words.show).map_err(|error| error.to_string())?;
+        menu.quit.set_text(words.quit).map_err(|error| error.to_string())?;
+    }
+    if let Some(tray) = app.tray_by_id("main-tray") {
+        tray.set_tooltip(Some(words.tooltip)).map_err(|error| error.to_string())?;
+    }
+    *lock(&engine.ui_language) = language;
+    Ok(())
+}
 #[tauri::command] fn get_scan_snapshot(engine: tauri::State<'_, Shared>) -> Progress { lock(&engine.progress).clone() }
 #[tauri::command] fn get_findings(engine: tauri::State<'_, Shared>) -> Vec<Finding> { lock(&engine.findings).values().cloned().collect() }
 #[tauri::command] fn pause_scan(paused: bool, app: tauri::AppHandle, engine: tauri::State<'_, Shared>) -> Result<(), String> {
@@ -174,23 +202,26 @@ pub fn run() {
     let root = match crate::platform::private_root() { Ok(p) => p, Err(e) => { startup_error(&format!("Cartella dati: {e:#}")); return; } };
     let defs = match updater::load_cached(&root).and_then(|cached| match cached { Some(d) => Ok(d), None => Definitions::bundled() }) { Ok(d) => d, Err(_) => match Definitions::bundled() { Ok(d) => d, Err(e) => { eprintln!("Definitions: {e}"); return; } } };
     let vault = match Vault::open(&root.join("Quarantine")) { Ok(v) => v, Err(e) => { startup_error(&format!("Quarantena: {e:#}")); return; } };
-    let engine = Arc::new(Engine { root, defs: RwLock::new(Arc::new(defs)), vault: Mutex::new(vault), progress: Mutex::new(Progress::default()), findings: Mutex::new(HashMap::new()), cancel: AtomicBool::new(false), paused: AtomicBool::new(false), active: AtomicBool::new(false), watching: AtomicBool::new(false), watcher: Mutex::new(None), workers: std::thread::available_parallelism().map(|n| n.get().saturating_sub(1).clamp(1, 4)).unwrap_or(1), last_event: Mutex::new(Instant::now()), shutdown: AtomicBool::new(false), updates: Mutex::new(()), watcher_incomplete: AtomicU64::new(0), last_health: Mutex::new(Instant::now()) });
+    let engine = Arc::new(Engine { root, defs: RwLock::new(Arc::new(defs)), vault: Mutex::new(vault), progress: Mutex::new(Progress::default()), findings: Mutex::new(HashMap::new()), cancel: AtomicBool::new(false), paused: AtomicBool::new(false), active: AtomicBool::new(false), watching: AtomicBool::new(false), watcher: Mutex::new(None), workers: std::thread::available_parallelism().map(|n| n.get().saturating_sub(1).clamp(1, 4)).unwrap_or(1), last_event: Mutex::new(Instant::now()), shutdown: AtomicBool::new(false), updates: Mutex::new(()), watcher_incomplete: AtomicU64::new(0), last_health: Mutex::new(Instant::now()), ui_language: Mutex::new("en".into()), tray_menu: Mutex::new(None) });
     let builder = tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, args, _| { if let Some(window) = app.get_webview_window("main") { let _ = window.show(); let _ = window.set_focus(); } if let Some(index) = args.iter().position(|a| a == "--scan") { if let Some(path) = args.get(index + 1) { let state = app.state::<Shared>().inner().clone(); external_scan(app.clone(),state,path.clone()); } } }))
         .plugin(tauri_plugin_dialog::init()).plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, None))
         .manage(engine.clone())
-        .invoke_handler(tauri::generate_handler![get_status, get_scan_snapshot, get_findings, start_scan, pause_scan, cancel_scan, list_quarantine, quarantine_file, restore_quarantine, delete_quarantine, set_watcher, check_updates])
+        .invoke_handler(tauri::generate_handler![get_status, set_ui_language, get_scan_snapshot, get_findings, start_scan, pause_scan, cancel_scan, list_quarantine, quarantine_file, restore_quarantine, delete_quarantine, set_watcher, check_updates])
         .setup(|app| {
             use tauri::{menu::{Menu, MenuItem}, tray::{TrayIconBuilder, TrayIconEvent, MouseButton, MouseButtonState}};
-            let show = MenuItem::with_id(app, "show", "Apri Aegis Security", true, None::<&str>)?;
-            let quit = MenuItem::with_id(app, "quit", "Esci e interrompi il monitoraggio", true, None::<&str>)?;
+            let words = native_text("en");
+            let show = MenuItem::with_id(app, "show", words.show, true, None::<&str>)?;
+            let quit = MenuItem::with_id(app, "quit", words.quit, true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show, &quit])?;
-            let mut tray = TrayIconBuilder::new().menu(&menu).tooltip("Aegis Security · monitoraggio user-mode")
+            let mut tray = TrayIconBuilder::with_id("main-tray").menu(&menu).tooltip(words.tooltip)
                 .on_menu_event(|app, event| match event.id.as_ref() { "show" => { if let Some(w) = app.get_webview_window("main") { let _ = w.show(); let _ = w.set_focus(); } }, "quit" => app.exit(0), _ => {} })
                 .on_tray_icon_event(|tray, event| { if matches!(event, TrayIconEvent::Click { button: MouseButton::Left, button_state: MouseButtonState::Up, .. }) { if let Some(w) = tray.app_handle().get_webview_window("main") { let _ = w.show(); let _ = w.set_focus(); } } });
             if let Some(icon) = app.default_window_icon() { tray = tray.icon(icon.clone()); } tray.build(app)?;
-            let state = app.state::<Shared>().inner().clone(); let _ = watch(true, app.handle(), &state);
+            let state = app.state::<Shared>().inner().clone();
+            *lock(&state.tray_menu) = Some(TrayMenu { show, quit });
+            let _ = watch(true, app.handle(), &state);
             if updater::configured() {
                 let weak = Arc::downgrade(&state); let handle = app.handle().clone();
                 std::thread::Builder::new().name("aegis-definitions-update".into()).spawn(move || loop {

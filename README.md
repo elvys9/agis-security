@@ -1,44 +1,72 @@
 # Aegis Security
 
-Applicazione desktop antimalware **sperimentale** per Windows 10/11 x64. Il client Tauri v2/React esegue scanner statico Rust, monitoraggio user-mode di cartelle selezionate, quarantena cifrata e aggiornamenti di definizioni verificati. Il pacchetto corrente è una **prerelease non firmata** e non costituisce una protezione antivirus certificata.
+**Aegis Security is an experimental Windows desktop security application, not a certified antivirus.** It combines a React/Tauri interface with a Rust static file scanner, a user-mode folder watcher, an encrypted quarantine vault, and a separately buildable Windows service. The current signature database contains only integration-test indicators. Do not rely on this prerelease as your primary endpoint protection.
 
-## Avvio e build
+## Download and try it
 
-Prerequisiti: Node.js/npm, Rust stable MSVC, Windows SDK e WebView2. Dalla radice del progetto, in PowerShell:
+The [latest experimental release](https://github.com/elvys9/aegis-security/releases) includes a Windows 10/11 x64 NSIS installer. The installer is **unsigned**. Test it in a disposable VM with a snapshot first.
 
-```powershell
+1. Download the installer from the release's **Assets** section.
+2. Run setup; UAC is required for installation and removal. WebView2 may be downloaded if it is not already installed.
+3. Open Aegis Security from the Start menu as a standard user. Do not run the application itself as Administrator.
+4. Try **Quick Scan** or choose a small, harmless folder under **Select folder**. Review the error and incomplete-analysis counters after a scan.
+5. If you test quarantine and restore, use a disposable test file and compare its SHA-256 before and after restoration. Closing the window leaves the app in the system tray; choose **Exit** there to stop monitoring.
+
+The interface starts in English. Use the **Language** menu in the header to choose English, Italian, French, German, Simplified Chinese, or Russian. The choice is saved locally. File paths, hashes, rule identifiers, and some low-level operating-system errors are intentionally left in their original form.
+
+## What works today
+
+| Area | Current behavior |
+|---|---|
+| Manual scans | Quick scan covers selected high-risk user folders and accessible on-disk images of active processes. Full scan traverses the main drive. Custom scan accepts files and folders through the picker or drag and drop. |
+| Static analysis | SHA-256 and legacy MD5 are calculated in a 64 KiB streaming pass. The engine computes global entropy, parses PE sections conservatively, flags writable-and-executable sections and high-entropy executable sections, and applies bundled YARA-X rules within a 16 MiB inspection budget. |
+| User-mode monitoring | Watches Downloads, Desktop, and TEMP for selected executable/script extensions while the app runs. It reports findings and native notifications but does not prevent execution. |
+| Quarantine | On Windows, stores authenticated, chunked AES-256-GCM containers under a per-user ProgramData vault. The master key is DPAPI-protected. Restoration refuses to overwrite an existing file. Quarantine is always an explicit user action. |
+| Definition updates | HTTPS download, Ed25519 verification, version checks, and atomic activation are implemented. The endpoint and public key are deliberately blank, so remote updates are currently disabled. |
+| Optional service | A separately built, manually installed LocalSystem service can run scheduled scans and write a protected log. It is not bundled by the desktop installer and has no GUI command channel. |
+
+Heuristic flags are evidence for review, not proof of malware. The bundled database includes only the EICAR test hash and a harmless YARA integration fixture; it is **not** a production threat-intelligence feed. Errors and incomplete analyses are shown rather than interpreted as clean results.
+
+## Important limitations
+
+- There is no minifilter, WFP driver, kernel anti-tampering, pre-execution blocking, ONNX model, process-memory scan, ransomware rollback, or persistence-remediation engine.
+- The user-mode watcher can miss events and cannot scan locked or inaccessible files. A successful scan does not guarantee the device is safe.
+- The installer and application are not code-signed. They have not completed clean-machine Windows 10/11 installation, upgrade, uninstall, performance, independent security, or antivirus-efficacy validation.
+- The Windows vault is designed for reversible containment; physical secure erasure on SSDs cannot be guaranteed. On macOS/Linux the current vault conservatively retains the original file and must not be treated as isolation.
+- The service and GUI are independent. Installing the service requires a separate administrator-reviewed process described in [its README](service-daemon/README.md).
+
+Keep an established antivirus enabled while evaluating Aegis Security.
+
+## Build from source
+
+Prerequisites: Node.js/npm, a stable Rust MSVC toolchain, Windows SDK, and WebView2. In PowerShell at the repository root:
+
+~~~powershell
 npm ci
 npm run tauri -- dev
-```
+~~~
 
-La build di sviluppo usa `%LOCALAPPDATA%\AegisSecurity-Dev`. Per creare l'installer NSIS:
+The debug build stores data under %LOCALAPPDATA%\AegisSecurity-Dev. To build the supported NSIS package:
 
-```powershell
+~~~powershell
 npm run tauri -- build --bundles nsis
-```
+~~~
 
-L'output è in `src-tauri/target/release/bundle/nsis/`. Installare il pacchetto prima di aprire la build Release: il setup prepara le ACL di `%ProgramData%\AegisSecurity`. Il programma si avvia come utente standard; non eseguirlo con «Esegui come amministratore». La chiusura della finestra la nasconde nella tray; scegliere «Esci» dal menu della tray per terminare il monitoraggio.
+The installer is written to src-tauri/target/release/bundle/nsis. Install it before launching the Release executable directly: setup prepares the protected ProgramData parent directories. Building does not install or start a SYSTEM service or driver.
 
-Per la prova manuale usare **Scansione rapida**, **Scansione completa** o scegliere un file/cartella per la scansione personalizzata. Il monitoraggio controlla Downloads, Desktop e TEMP mentre l'app è in esecuzione. Il primo database include soltanto la firma di test EICAR e una regola YARA di autotest: l'assenza di un rilevamento non prova che un file sia sicuro.
+Run the localization checks with \`node --test src/i18n.test.mjs\`. The [testing guide](docs/testing.md) lists the native Rust suites and VM validation steps.
 
-## Struttura
+## Project layout
 
-| Directory | Scopo |
-|---|---|
-| `src/` | Interfaccia React, comandi ed eventi Tauri, CSS/Tailwind |
-| `src-tauri/` | Motore Rust, parser PE, YARA, watcher, vault, updater e app desktop |
-| `service-daemon/` | Scanner schedulato Windows SCM opzionale; installazione amministrativa separata |
-| `signatures/` | Database iniziale, regole e configurazione del feed firmato |
-| `installer/` | Hook NSIS, provisioning del vault e wrapper di build |
-| `docs/` | Architettura, test, distribuzione e audit |
-| `archive/` | Copia verificata del precedente prototipo C++/WPF |
+~~~text
+src/                 React interface and six-language message catalog
+src-tauri/           Tauri desktop backend, scanner, watcher, vault, updater
+service-daemon/      Optional, separately installed Windows SCM scanner
+signatures/          Integration-test definitions and YARA fixture
+installer/           NSIS hooks and protected-vault setup
+docs/                Architecture, testing, distribution, workspace audit
+~~~
 
-`node_modules/`, `dist/`, `.tools/` e i `target/` Cargo sono output locali rigenerabili, esclusi da Git.
+Dependencies are locked in package-lock.json and the two Cargo.lock files. Generated output, local toolchains, and the archived C++/WPF prototype are excluded from Git.
 
-## Stato dei componenti
-
-Lo scanner calcola SHA-256/MD5 in streaming, entropia globale e sezioni PE, rileva sezioni W+X ed esegue le regole YARA-X incluse. Le euristiche sono **indizi** e richiedono revisione. Il worker pool manuale è limitato a 1–4 thread; file non leggibili e analisi incomplete vengono conteggiati. La quarantena Windows usa AES-256-GCM a blocchi con chiave protetta da DPAPI, verifica del contenitore prima della rimozione dell'originale e ripristino senza sovrascrittura. La cancellazione fisica su SSD non è garantibile dalla sovrascrittura applicativa.
-
-Il servizio SYSTEM è costruibile e testato, ma non è incluso né avviato dall'installer e non comunica con la GUI. Il monitoraggio della GUI non blocca un file prima dell'esecuzione. Driver minifilter/WFP, anti-tampering kernel, ML ONNX, scansione della memoria dei processi e linking/remediation di persistenze non sono implementati. Il feed HTTPS/Ed25519 resta disabilitato finché endpoint e chiave pubblica non vengono forniti e verificati. Su macOS/Linux il vault conserva l'originale: non considerarlo isolamento effettivo.
-
-Consultare [architettura](docs/architecture.md), [test](docs/testing.md), [audit](docs/workspace-audit.md) e [distribuzione](docs/distribution.md) prima di qualsiasi rilascio.
+Read the [architecture](docs/architecture.md), [distribution notes](docs/distribution.md), and [workspace audit](docs/workspace-audit.md) for component boundaries and release gates. This repository has no open-source license at present; public visibility does not grant general reuse rights.

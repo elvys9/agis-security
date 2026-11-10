@@ -1,64 +1,64 @@
-# Architettura corrente e percorso EPP/EDR
+# Current architecture and EPP/EDR roadmap
 
-Il prodotto corrente è un'applicazione Tauri **user-mode**, avviata come utente standard. La modularità è ispirata alla categoria EPP/EDR; non incorpora componenti Malwarebytes né driver certificati. Su Windows l'installer richiede UAC soltanto per il setup. Il servizio SCM opzionale è indipendente e non è la controparte privilegiata dei comandi GUI.
+Aegis Security is currently a **standard-user Tauri application**. Its modular structure is inspired by endpoint security products, but it does not contain proprietary Malwarebytes components or a certified kernel driver. The optional SCM service is independent of the GUI and does not process GUI commands.
 
-```text
-Utente standard
-┌─────────────────────────────────────────────────────────────┐
-│ React/WebView2 ── invoke/eventi Tauri ── Rust app.rs         │
-│ Dashboard, scanner live, quarantena, stato watcher/update    │
-└────────────────────────────────┬────────────────────────────┘
-                                 │ comandi con parametri validati
-              ┌──────────────────┴─────────────────────────────┐
-              │ coordinatore scansione + pool 1–4 worker        │
-              │ WalkDir → SHA-256/MD5 → PE/entropia → YARA-X     │
-              │ findings + contatori errori/copertura incompleta│
-              └───────────┬──────────────────────┬──────────────┘
-                          │                      │
-                notify Downloads/           Vault AES-256-GCM
-                Desktop/TEMP → alert         DPAPI + ACL SID utente
-                          │                      │
-                          └──── definizioni in memoria ◀── HTTPS
-                                      Ed25519 verificato (non configurato)
+~~~text
+Standard user
+┌───────────────────────────────────────────────────────────┐
+│ React/WebView2 UI ── Tauri commands/events ── Rust app.rs  │
+│ Six-language controls, scan progress, findings, vault     │
+└──────────────────────────────┬────────────────────────────┘
+                               │ validated commands
+             ┌─────────────────┴───────────────────────────┐
+             │ scan coordinator + bounded pool (1–4 workers)│
+             │ WalkDir → SHA-256/MD5 → PE/entropy → YARA-X   │
+             │ findings, read errors, incomplete coverage    │
+             └──────────────┬───────────────────┬────────────┘
+                            │                   │
+                notify: Downloads,         AES-256-GCM vault
+                Desktop, TEMP              DPAPI + per-user ACL
+                            └─────────┬─────────┘
+                             in-memory definitions
+                             HTTPS + Ed25519 (unconfigured)
 
-Confine amministrativo separato
-┌──────────────────────────────────────────────────────────────┐
-│ Servizio SCM opzionale LocalSystem: scansioni schedulate,     │
-│ watcher user-mode, log protetto. Nessun IPC con la GUI.       │
-└──────────────────────────────────────────────────────────────┘
+Separate administrator boundary
+┌───────────────────────────────────────────────────────────┐
+│ Optional LocalSystem SCM service: scheduled scans,        │
+│ user-mode watcher, protected log. No GUI command channel. │
+└───────────────────────────────────────────────────────────┘
 
-Ring 0: nessun driver installato o implementato in questo albero.
-```
+Ring 0: no driver is implemented or installed by this release.
+~~~
 
-| Componente | Privilegio | API/librerie | CPU/RAM e limiti | Errori |
-|---|---|---|---|---|
-| GUI Tauri/React | Utente standard | Tauri invoke/events, dialog, tray, WebView2 | WebView2 va misurato su target; nessuna promessa <45 MB | Comandi asincroni, stato degradato visibile |
-| Scanner | Utente standard | WalkDir, Read, SHA-256, MD5, parser PE, YARA-X | 1–4 worker; stream 64 KiB per file, code limitate | Accessi negati conteggiati; risultato incompleto distinto |
-| Watcher | Utente standard | notify/ReadDirectoryChangesW | Un worker; debounce/coda bounded | Eventi persi e analisi incomplete esposti |
-| Vault | Utente standard | AES-256-GCM, DPAPI, ACL NTFS, handle Windows | Chunk da 1 MiB; un'operazione per volta | Autenticazione, no-clobber e fail-closed |
-| Updater | Utente standard | HTTPS rustls, Ed25519, swap definizioni | Periodico solo se configurato; dimensione download limitata | Firma/versione/expiry obbligatorie; cache verificata |
-| Servizio opzionale | LocalSystem | SCM, notify, scanner condiviso | 1–4 worker; queue e log con limite | Errori su log, directory e ACL stretti |
-| Driver minifilter/WFP | Ring 0, futuro | FltMgr, WFP, callbacks | Non misurabile: assente | Nessuna pretesa di enforcement kernel |
+| Component | Privilege | Main APIs/libraries | Performance and failure handling |
+|---|---|---|---|
+| Tauri/React GUI | Standard user | Tauri invoke/events, dialog, tray, WebView2 | Async commands; progress emission at most every 50 ms. WebView2 idle RAM is not yet benchmarked. |
+| Static scanner | Standard user | WalkDir, streaming SHA-256/MD5, PE parser, YARA-X | 1–4 workers, bounded queue, 64 KiB stream buffer per file. Read failures and incomplete coverage are counted. |
+| Folder watcher | Standard user | notify / ReadDirectoryChangesW | Single worker, bounded debounce. Lost or incomplete events appear as warnings. |
+| Quarantine | Standard user | AES-256-GCM, DPAPI, NTFS ACLs and Windows handles | 1 MiB chunks, authenticated readback, fail-closed restore with no overwrite. |
+| Updater | Standard user | HTTPS/rustls, Ed25519, atomic definition swap | Download size and version/expiry limits; disabled until feed trust material is configured. |
+| Optional service | LocalSystem | SCM, notify, shared scanner | 1–4 workers, bounded queue/log, strict owner/DACL checks; manually installed. |
+| Minifilter/WFP | Kernel, future | FltMgr and WFP | Not implemented; no kernel enforcement claim. |
 
-## Pipeline attuale
+## Detection sequence
 
-1. Enumerazione senza seguire symlink/reparse, esclusione di file speciali e directory dati.
-2. Lettura a blocchi, SHA-256 e MD5, istogramma globale; confronto con le definizioni hash.
-3. Parsing PE conservativo, entropia delle sezioni, W+X ed euristiche.
-4. Regole YARA-X locali. Le regole incluse sono limitate all'autotest.
-5. Un risultato sospetto viene mostrato all'utente; nessuna quarantena automatica. L'utente può isolarlo, ripristinarlo o eliminare il contenitore cifrato.
+1. Traverse ordinary files without following symlinks or reparse points; skip special OS files and the vault.
+2. Read in blocks, calculate hashes and global entropy, and compare SHA-256 with bundled definitions.
+3. Parse PE sections, calculate section entropy, and flag W^X and high-entropy executable sections.
+4. Run local YARA-X rules when the file fits the inspection budget.
+5. Show evidence for user review. Quarantine requires an explicit action; there is no automatic file removal.
 
-Il progetto **non** verifica Authenticode, non implementa Bloom filter, ONNX, analisi comportamentale/ransomware, linking di autorun o blocco pre-esecuzione. Il servizio non riceve comandi da Tauri. L'analisi di file leggibili è opportunistica; file mutati o bloccati possono produrre errori/incompletezza. La scansione rapida considera cartelle ad alto rischio e immagini su disco dei processi attivi, non la memoria dei processi.
+The current engine does **not** verify Authenticode, use a Bloom filter or ONNX model, correlate runtime behavior, remove persistence, or block execution. Quick Scan checks accessible on-disk process images, not process memory. An unreadable or changing file is reported as an error or incomplete analysis.
 
-> [Self-Check] La GUI rimane senza privilegi elevati e il parsing opera fuori dal kernel. I comandi lunghi usano thread dedicati; la scansione ha pool e code limitati, gli eventi progresso sono emessi al massimo ogni 50 ms. Il vault autentica e rilegge il contenitore prima di tentare la rimozione del file sorgente su Windows. Questo non prova assenza di race su ogni filesystem né protezione da un amministratore ostile.
+> [Self-Check] The renderer has no privileged filesystem scanner. Parsing remains outside the kernel. Scan workers and queues are bounded, and expensive Tauri commands run off the UI thread. The vault authenticates a durable container before attempting source removal on Windows. This does not prove safety against every filesystem race or a hostile administrator.
 
-## Roadmap in quattro fasi
+## Four-phase development path
 
-| Fase | Stato e uscita richiesta |
+| Phase | Status and exit gate |
 |---|---|
-| 1. Scanner statico | Implementato in Rust, testato con hash, PE, entropia, YARA, errori e fixture innocue. Allargare corpus/fuzzing e benchmark prima del rilascio. |
-| 2. Desktop user-mode | Tauri, tray, watcher e installer NSIS implementati. Richiesti test su Windows 10/11 puliti, upgrade/disinstallazione, accessibilità, misure CPU/RAM, firma codice. |
-| 3. Servizio e remediation | Servizio SCM opzionale costruito, ma non integrato nel setup/GUI. Servono broker IPC autenticato, autorizzazione, worker isolati, journal e bonifica di persistenze, con test di rollback. |
-| 4. Protezione kernel | Progettare minifilter/WFP observe-only e poi enforcement. Richiesti WDK/HLK, Driver Verifier, HVCI, firma Microsoft, pilota e recovery; nessun artefatto Ring 0 è distribuito oggi. |
+| 1. Static scanner | Implemented in Rust with hash, PE, entropy, YARA, error, and harmless fixture tests. Expand fuzzing/corpus and benchmark before release. |
+| 2. Standard-user desktop | Tauri, tray, watcher, six-language UI, and NSIS bundle implemented. Clean Windows 10/11 VM tests, accessibility review, performance measurements, upgrade/uninstall tests, and code signing remain. |
+| 3. Service and remediation | Optional SCM service exists, but is not integrated into setup or GUI. Requires authenticated IPC, authorization, isolated workers, a remediation journal, and rollback tests. |
+| 4. Certified kernel protection | Design an observe-only minifilter/WFP sensor before enforcement. Requires WDK/HLK, Driver Verifier, HVCI, Microsoft signing, compatibility testing, pilot rollout, and recovery. No Ring 0 artifact ships today. |
 
-Qualunque distribuzione pubblica richiede prima un feed di firme reale firmato, revisione indipendente, test su hardware/VM supportati e firma del codice. EV/attestation/WHQL non sono ottenuti da questa build.
+A public production claim requires a real signed threat-intelligence feed, independent security review, supported-hardware validation, and signed release artifacts. EV/attestation/WHQL are not produced by a source build.
