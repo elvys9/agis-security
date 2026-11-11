@@ -109,3 +109,11 @@ fn catalog_rejects_untrusted_sources_and_duplicate_rules() {
     assert!(Catalog::parse(&RULES.replace("https://learn.microsoft.com/", "http://example.com/")).is_err());
     assert!(Catalog::parse(&RULES.replace("\"uac-secure-desktop\"", "\"uac\"")).is_err());
 }
+
+#[test]
+fn bundled_rules_are_original_sourced_and_explicit_about_uncertainty() {
+    let catalog = Catalog::parse(include_str!("../../catalog/rules.json")).unwrap();
+    assert_eq!(catalog.rules.len(), 5);
+    assert!(catalog.rules.iter().all(|rule| rule.source_url.starts_with("https://learn.microsoft.com/")));
+    assert_eq!(catalog.rules.iter().filter(|rule| rule.verify).count(), 2);
+}

@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "uac-admin-approval",
+      "title": "UAC administrator approval mode",
+      "category": "User Account Control",
+      "description": "Checks the stored EnableLUA configuration. A matching registry value does not prove that a pending reboot has completed.",
+      "source_url": "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-gpsb/958053ae-5397-4f96-977f-b7700ee461ec",
+      "verify": false,
+      "probe": {
+        "kind": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "value": "EnableLUA"
+      },
+      "expected": { "kind": "dword_eq", "value": 1 }
+    },
+    {
+      "id": "uac-secure-desktop",
+      "title": "UAC prompts on the secure desktop",
+      "category": "User Account Control",
+      "description": "Checks the stored PromptOnSecureDesktop configuration, not the result of an actual elevation prompt.",
+      "source_url": "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-gpsb/9ad50fd3-4d8d-4870-9f5b-978ce292b9d8",
+      "verify": false,
+      "probe": {
+        "kind": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "value": "PromptOnSecureDesktop"
+      },
+      "expected": { "kind": "dword_eq", "value": 1 }
+    },
+    {
+      "id": "uac-secure-uiaccess-paths",
+      "title": "UIAccess restricted to secure locations",
+      "category": "User Account Control",
+      "description": "Checks the stored EnableSecureUIAPaths policy; it does not validate individual application signatures.",
+      "source_url": "https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/settings-and-configuration/",
+      "verify": false,
+      "probe": {
+        "kind": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System",
+        "value": "EnableSecureUIAPaths"
+      },
+      "expected": { "kind": "dword_eq", "value": 1 }
+    },
+    {
+      "id": "llmnr-policy",
+      "title": "LLMNR policy",
+      "category": "Network name resolution",
+      "description": "The policy registry mapping is documented, but adapter-level and managed-policy state need verification before asserting effective protection.",
+      "source_url": "https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-dnsclient",
+      "verify": true,
+      "min_build": 19041,
+      "probe": {
+        "kind": "registry",
+        "hive": "HKLM",
+        "key": "SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient",
+        "value": "EnableMulticast"
+      },
+      "expected": { "kind": "dword_eq", "value": 0 }
+    },
+    {
+      "id": "ntlm-legacy-policy",
+      "title": "Legacy LM and NTLM acceptance policy",
+      "category": "Authentication",
+      "description": "The documented value 5 refuses LM and NTLM, but the appropriate policy depends on domain and legacy dependencies; this audit does not establish effective network behavior.",
+      "source_url": "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/network-security-lan-manager-authentication-level",
+      "verify": true,
+      "probe": {
+        "kind": "registry",
+        "hive": "HKLM",
+        "key": "SYSTEM\\CurrentControlSet\\Control\\Lsa",
+        "value": "LmCompatibilityLevel"
+      },
+      "expected": { "kind": "dword_eq", "value": 5 }
+    }
+  ]
+}
