@@ -4,6 +4,7 @@ pub mod quarantine;
 pub mod platform;
 pub mod watcher;
 pub mod updater;
+pub mod hardening;
 #[cfg(feature = "desktop")]
 mod app;
 #[cfg(feature = "desktop")]
