@@ -30,6 +30,7 @@ Heuristic flags are evidence for review, not proof of malware. The bundled datab
 ## Important limitations
 
 - There is no minifilter, WFP driver, kernel anti-tampering, pre-execution blocking, ONNX model, process-memory scan, ransomware rollback, or persistence-remediation engine.
+- There is no native hardening assessment or settings panel in the application. The C++ registry reader in the engineering guide is reference code, not a compiled Aegis module.
 - The user-mode watcher can miss events and cannot scan locked or inaccessible files. A successful scan does not guarantee the device is safe.
 - The installer and application are not code-signed. They have not completed clean-machine Windows 10/11 installation, upgrade, uninstall, performance, independent security, or antivirus-efficacy validation.
 - The Windows vault is designed for reversible containment; physical secure erasure on SSDs cannot be guaranteed. On macOS/Linux the current vault conservatively retains the original file and must not be treated as isolation.
