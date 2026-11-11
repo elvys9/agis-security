@@ -23,6 +23,10 @@ The engine tests exercise harmless hash/PE/entropy/YARA fixtures, malformed file
 
 For a manual desktop check without an installer, run `npm run tauri -- dev`. Confirm the language menu switches every view and persists after restarting. Run Quick Scan, a small Custom Scan, pause/resume/stop, and inspect the error and incomplete-analysis counters. In the browser-only preview, native file actions are intentionally disabled.
 
+## Local native-launch smoke test (2026-11-11)
+
+On Windows 11 Pro build 26200, `npm run tauri -- dev` started Vite on `127.0.0.1:1420`, compiled the Rust Debug executable, and launched `aegis-security.exe`. Process inspection found a responding interactive window titled **Aegis Security** and the Debug data root under `%LOCALAPPDATA%\AegisSecurity-Dev`. The app was left running for hands-on testing. This confirms native startup only: no buttons, scan, quarantine action, installer, service, or VM deployment were exercised during this smoke test.
+
 Test quarantine and restore only on a **disposable file** and compare SHA-256 before and after with `Get-FileHash`. Other installed antivirus products may intercept the EICAR test string; do not disable them or run live malware merely to validate the UI.
 
 Install the unsigned NSIS package in a clean, disposable Windows VM with a standard account and a snapshot. Check setup-only UAC, non-elevated application launch, WebView2 bootstrap, tray behavior, Explorer actions, Unicode/spaced paths, upgrade, and uninstall with vault preservation. Repeat on Windows 10 and 11. Measure idle and scan CPU/RAM; a 45 MB WebView2 footprint has **not** been demonstrated. The shipped definitions are for integration testing, not primary antivirus protection.
