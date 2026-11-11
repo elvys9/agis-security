@@ -28,7 +28,7 @@ The interface starts in English. Use the **Language** menu in the header to choo
 
 Heuristic flags are evidence for review, not proof of malware. The bundled database includes only the EICAR test hash and a harmless YARA integration fixture; it is **not** a production threat-intelligence feed. Errors and incomplete analyses are shown rather than interpreted as clean results.
 
-The hardening audit described above is available on the `feature/hardening` source branch. The published 0.1.1 installer predates this branch and does not contain the hardening page.
+The hardening audit is available in the current source code. The published 0.1.1 installer predates this feature and does not contain the hardening page; build the desktop app from source to try it.
 
 ## Important limitations
 

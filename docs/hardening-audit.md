@@ -1,6 +1,6 @@
 # Native read-only hardening audit
 
-This document describes the **feature/hardening** branch. The published 0.1.1 installer predates this branch and does not contain the audit. Aegis remains an experimental scanner, not a primary antivirus.
+This document describes the native hardening audit in the current source code. The published 0.1.1 installer predates this feature and does not contain the audit. Aegis remains an experimental scanner, not a primary antivirus.
 
 ## Scope and architecture
 
@@ -36,6 +36,6 @@ npm run test:i18n
 npm run build
 ~~~
 
-The tests use a simulated `Probe` for matching, missing values, access denied, management and applicability, plus a read-only native registry smoke check on Windows. They do not write system settings. Review `git diff --name-only main...feature/hardening` to confirm scanner, quarantine, watcher, updater and service-daemon source files remain unchanged.
+The tests use a simulated `Probe` for matching, missing values, access denied, management and applicability, plus a read-only native registry smoke check on Windows. They do not write system settings. Scanner, quarantine, watcher, updater and service-daemon source files were not changed by this feature.
 
 This audit does **not** make antivirus file scans faster. It runs on demand, independently of the scanner. A future local LLM may explain the structured result, but it must not turn uncertain results into confident security claims or gain permission to change system settings.
