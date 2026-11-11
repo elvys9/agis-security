@@ -69,4 +69,4 @@ docs/                Architecture, testing, distribution, workspace audit
 
 Dependencies are locked in package-lock.json and the two Cargo.lock files. Generated output, local toolchains, and the archived C++/WPF prototype are excluded from Git.
 
-Read the [architecture](docs/architecture.md), [distribution notes](docs/distribution.md), and [workspace audit](docs/workspace-audit.md) for component boundaries and release gates. This repository has no open-source license at present; public visibility does not grant general reuse rights.
+Read the [architecture](docs/architecture.md), [primary-antivirus and native-hardening engineering guide](docs/primary-antivirus-and-hardening-plan.md), [distribution notes](docs/distribution.md), and [workspace audit](docs/workspace-audit.md) for component boundaries and release gates. This repository has no open-source license at present; public visibility does not grant general reuse rights.
