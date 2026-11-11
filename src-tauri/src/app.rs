@@ -1,4 +1,4 @@
-use crate::{definitions::Definitions, scanner, quarantine::{Vault, VaultEntry}, watcher, updater};
+use crate::{definitions::Definitions, scanner, quarantine::{Vault, VaultEntry}, watcher, updater, hardening};
 use anyhow::{anyhow, Context, Result};
 use serde::Serialize;
 use std::{collections::HashMap, path::PathBuf, sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, AtomicU64, Ordering}}, time::{Duration, Instant}};
@@ -65,6 +65,11 @@ fn record(app: &tauri::AppHandle, engine: &Engine, path: &std::path::Path, resul
     } else { let mut p = lock(&engine.progress); p.found += 1; drop(p); let _ = app.emit("scan-finding", &finding); }
 }
 #[tauri::command] fn get_status(engine: tauri::State<'_, Shared>) -> Status { status(&engine) }
+#[tauri::command] async fn audit_hardening() -> Result<hardening::Report, String> {
+    tauri::async_runtime::spawn_blocking(hardening::audit_system)
+        .await.map_err(|error| error.to_string())?
+        .map_err(|error| error.to_string())
+}
 #[tauri::command] fn set_ui_language(language: String, app: tauri::AppHandle, engine: tauri::State<'_, Shared>) -> Result<(), String> {
     if !["en", "it", "fr", "de", "zh-CN", "ru"].contains(&language.as_str()) { return Err("Unsupported language".into()); }
     let words = native_text(&language);
@@ -208,7 +213,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init()).plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, None))
         .manage(engine.clone())
-        .invoke_handler(tauri::generate_handler![get_status, set_ui_language, get_scan_snapshot, get_findings, start_scan, pause_scan, cancel_scan, list_quarantine, quarantine_file, restore_quarantine, delete_quarantine, set_watcher, check_updates])
+        .invoke_handler(tauri::generate_handler![get_status, set_ui_language, audit_hardening, get_scan_snapshot, get_findings, start_scan, pause_scan, cancel_scan, list_quarantine, quarantine_file, restore_quarantine, delete_quarantine, set_watcher, check_updates])
         .setup(|app| {
             use tauri::{menu::{Menu, MenuItem}, tray::{TrayIconBuilder, TrayIconEvent, MouseButton, MouseButtonState}};
             let words = native_text("en");
