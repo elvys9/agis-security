@@ -38,6 +38,7 @@ Ring 0: no driver is implemented or installed by this release.
 | Quarantine | Standard user | AES-256-GCM, DPAPI, NTFS ACLs and Windows handles | 1 MiB chunks, authenticated readback, fail-closed restore with no overwrite. |
 | Updater | Standard user | HTTPS/rustls, Ed25519, atomic definition swap | Download size and version/expiry limits; disabled until feed trust material is configured. |
 | Optional service | LocalSystem | SCM, notify, shared scanner | 1–4 workers, bounded queue/log, strict owner/DACL checks; manually installed. |
+| Hardening audit | Standard user | Read-only Win32 registry API through Rust, typed JSON rules | Separate on-demand probe; inaccessible and missing values remain inconclusive. No registry writes or PowerShell process. |
 | Minifilter/WFP | Kernel, future | FltMgr and WFP | Not implemented; no kernel enforcement claim. |
 
 ## Detection sequence
@@ -48,7 +49,7 @@ Ring 0: no driver is implemented or installed by this release.
 4. Run local YARA-X rules when the file fits the inspection budget.
 5. Show evidence for user review. Quarantine requires an explicit action; there is no automatic file removal.
 
-The current engine does **not** verify Authenticode, use a Bloom filter or ONNX model, correlate runtime behavior, remove persistence, or block execution. Quick Scan checks accessible on-disk process images, not process memory. An unreadable or changing file is reported as an error or incomplete analysis.
+The current engine does **not** verify Authenticode, use a Bloom filter or ONNX model, correlate runtime behavior, remove persistence, or block execution. Quick Scan checks accessible on-disk process images, not process memory. An unreadable or changing file is reported as an error or incomplete analysis. The separate hardening audit reads five registry-policy rules; it does not participate in file scanning or remediation.
 
 > [Self-Check] The renderer has no privileged filesystem scanner. Parsing remains outside the kernel. Scan workers and queues are bounded, and expensive Tauri commands run off the UI thread. The vault authenticates a durable container before attempting source removal on Windows. This does not prove safety against every filesystem race or a hostile administrator.
 

@@ -17,9 +17,12 @@ With Cargo available in PATH, run the native suites:
 cargo test --manifest-path src-tauri/Cargo.toml --release --locked --no-default-features --features yara
 cargo test --manifest-path service-daemon/Cargo.toml --release --locked
 cargo build --manifest-path service-daemon/Cargo.toml --release --locked
+cargo test --manifest-path src-tauri/Cargo.toml --test hardening --no-default-features --locked
 ~~~
 
 The engine tests exercise harmless hash/PE/entropy/YARA fixtures, malformed files, vault encryption and restoration, Windows alternate streams, and an actual filesystem watcher event. The service tests cover configuration, security checks, bounded queues, and logs. None of these tests installs or starts a driver or service.
+
+The hardening tests use a simulated `Probe` for status logic and a read-only Windows registry probe. They never change a security setting. In the desktop app, open **Hardening audit** and select **Run audit**; missing keys, denied reads, type mismatches, and rules marked for verification must not be shown as a clean system.
 
 For a manual desktop check without an installer, run `npm run tauri -- dev`. Confirm the language menu switches every view and persists after restarting. Run Quick Scan, a small Custom Scan, pause/resume/stop, and inspect the error and incomplete-analysis counters. In the browser-only preview, native file actions are intentionally disabled.
 

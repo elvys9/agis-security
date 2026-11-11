@@ -90,7 +90,7 @@ PREPARED -> APPLIED -> VERIFIED -> COMMITTED
 
 ## 4. Native system hardening and configuration assessment
 
-**Not implemented in Aegis 0.1.1.** There is no hardening screen, rule database, native hardening executable/library, or remediation command. The C++ function below is a standalone read-only reference example in this document; it is not compiled into the Tauri application. Implementing a visible audit is a separate development milestone.
+**Release 0.1.1 does not include hardening.** The `feature/hardening` branch adds a limited, read-only Rust registry audit with five original rules and a desktop view; it has no remediation or local LLM. See the [native audit guide](./hardening-audit.md). The C++ function below remains a standalone reference example and is not compiled into Aegis.
 
 **Architecture.** Add a small native C++20 audit engine and a separately authorized remediation helper. No product runtime may spawn `powershell.exe`; PowerShell commands in this guide are operator-only checks. Rules should be signed, versioned JSON with explicit Windows build/edition/domain applicability, probe kind, registry view, value type, operator, missing-value semantics, policy owner, and rollback strategy. Support `REG_DWORD`, `REG_SZ`, `REG_MULTI_SZ`; equality, greater-or-equal, bitmask and absent-key predicates. Open the 64-bit view with `KEY_READ | KEY_WOW64_64KEY` (or C# `RegistryView.Registry64`); never hard-code `Wow6432Node`. Microsoft requires consistent alternate-view flags for child operations. [Registry view documentation](https://learn.microsoft.com/en-us/windows/win32/winprog64/accessing-an-alternate-registry-view)
 

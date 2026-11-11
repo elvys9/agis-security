@@ -24,13 +24,14 @@ The interface starts in English. Use the **Language** menu in the header to choo
 | Quarantine | On Windows, stores authenticated, chunked AES-256-GCM containers under a per-user ProgramData vault. The master key is DPAPI-protected. Restoration refuses to overwrite an existing file. Quarantine is always an explicit user action. |
 | Definition updates | HTTPS download, Ed25519 verification, version checks, and atomic activation are implemented. The endpoint and public key are deliberately blank, so remote updates are currently disabled. |
 | Optional service | A separately built, manually installed LocalSystem service can run scheduled scans and write a protected log. It is not bundled by the desktop installer and has no GUI command channel. |
+| Read-only hardening audit | Evaluates five original, Microsoft-sourced registry-policy rules through a native Rust probe. The separate Hardening audit page shows observed values, inconclusive states, and source URLs. No setting is changed and no PowerShell process is launched. |
 
 Heuristic flags are evidence for review, not proof of malware. The bundled database includes only the EICAR test hash and a harmless YARA integration fixture; it is **not** a production threat-intelligence feed. Errors and incomplete analyses are shown rather than interpreted as clean results.
 
 ## Important limitations
 
 - There is no minifilter, WFP driver, kernel anti-tampering, pre-execution blocking, ONNX model, process-memory scan, ransomware rollback, or persistence-remediation engine.
-- There is no native hardening assessment or settings panel in the application. The C++ registry reader in the engineering guide is reference code, not a compiled Aegis module.
+- The hardening page currently covers only five registry-policy rules. It does not assess all Windows security settings, prove effective protection, apply changes, or provide LLM explanations yet. It does not accelerate antivirus scanning.
 - The user-mode watcher can miss events and cannot scan locked or inaccessible files. A successful scan does not guarantee the device is safe.
 - The installer and application are not code-signed. They have not completed clean-machine Windows 10/11 installation, upgrade, uninstall, performance, independent security, or antivirus-efficacy validation.
 - The Windows vault is designed for reversible containment; physical secure erasure on SSDs cannot be guaranteed. On macOS/Linux the current vault conservatively retains the original file and must not be treated as isolation.
@@ -62,6 +63,7 @@ Run the localization checks with `node --test src/i18n.test.mjs`. The [testing g
 ~~~text
 src/                 React interface and six-language message catalog
 src-tauri/           Tauri desktop backend, scanner, watcher, vault, updater
+catalog/             Original Microsoft-sourced hardening rules
 service-daemon/      Optional, separately installed Windows SCM scanner
 signatures/          Integration-test definitions and YARA fixture
 installer/           NSIS hooks and protected-vault setup
@@ -70,4 +72,4 @@ docs/                Architecture, testing, distribution, workspace audit
 
 Dependencies are locked in package-lock.json and the two Cargo.lock files. Generated output, local toolchains, and the archived C++/WPF prototype are excluded from Git.
 
-Read the [architecture](docs/architecture.md), [primary-antivirus and native-hardening engineering guide](docs/primary-antivirus-and-hardening-plan.md), [distribution notes](docs/distribution.md), and [workspace audit](docs/workspace-audit.md) for component boundaries and release gates. This repository has no open-source license at present; public visibility does not grant general reuse rights.
+Read the [architecture](docs/architecture.md), [hardening audit guide](docs/hardening-audit.md), [primary-antivirus engineering guide](docs/primary-antivirus-and-hardening-plan.md), [distribution notes](docs/distribution.md), and [workspace audit](docs/workspace-audit.md) for component boundaries and release gates. This repository has no open-source license at present; public visibility does not grant general reuse rights.
