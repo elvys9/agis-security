@@ -54,7 +54,7 @@ npm run tauri -- build --bundles nsis
 
 The installer is written to src-tauri/target/release/bundle/nsis. Install it before launching the Release executable directly: setup prepares the protected ProgramData parent directories. Building does not install or start a SYSTEM service or driver.
 
-Run the localization checks with \`node --test src/i18n.test.mjs\`. The [testing guide](docs/testing.md) lists the native Rust suites and VM validation steps.
+Run the localization checks with `node --test src/i18n.test.mjs`. The [testing guide](docs/testing.md) lists the native Rust suites and VM validation steps.
 
 ## Project layout
 
