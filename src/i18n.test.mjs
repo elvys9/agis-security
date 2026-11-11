@@ -31,3 +31,22 @@ test('native health and coverage messages preserve counts and technical details'
   assert.match(translateEngineText('fr', 'PE incomplete: Invalid PE header offset'), /Invalid PE header offset/);
   assert.equal(translateEngineText('de', 'SHA-256: EICAR'), 'SHA-256: EICAR');
 });
+
+test('read-only hardening controls and all eight outcomes are translated', () => {
+  const keys = [
+    'hardening', 'hardeningHelp', 'hardeningIntro', 'hardeningRun',
+    'hardeningRunning', 'hardeningPreview', 'hardeningNoResults',
+    'hardeningSummary', 'hardeningCompliant', 'hardeningNonCompliant',
+    'hardeningInconclusive', 'hardeningObserved', 'hardeningExpected',
+    'hardeningSource', 'hardeningReason', 'hardeningTechnical',
+    'hardeningResults', 'hardeningPrevious', 'hardeningNext',
+    'Compliant', 'NonCompliant', 'MissingKey', 'MissingValue',
+    'AccessDenied', 'NotApplicable', 'ManagedExternally', 'UnknownEffectiveState',
+  ];
+  for (const { code } of languages) {
+    for (const key of keys) {
+      assert.ok(messages[code][key]?.trim(), code + ':' + key);
+      assert.notEqual(translate(code, key), key, code + ':' + key);
+    }
+  }
+});

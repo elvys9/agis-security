@@ -7,19 +7,21 @@ import { enable, disable, isEnabled } from '@tauri-apps/plugin-autostart';
 import {
   ShieldCheck, ShieldAlert, LayoutDashboard, ScanLine, Archive, Terminal,
   Activity, Play, Pause, Square, FolderOpen, FileSearch, Database,
-  RotateCcw, Trash2, CircleAlert, X, Download, Languages,
+  RotateCcw, Trash2, CircleAlert, X, Download, Languages, ClipboardCheck,
 } from 'lucide-react';
 import { languages, initialLanguage, translate, translateEngineText, formatNumber } from './i18n.js';
+import HardeningView from './components/HardeningView.jsx';
 
 const native = isTauri();
 const NAV = [
   ['dashboard', 'dashboard', LayoutDashboard],
   ['scanner', 'scanner', ScanLine],
+  ['hardening', 'hardening', ClipboardCheck],
   ['quarantine', 'quarantine', Archive],
   ['inspector', 'settings', Terminal],
 ];
 const pageHelp = {
-  dashboard: 'dashboardHelp', scanner: 'scannerHelp',
+  dashboard: 'dashboardHelp', scanner: 'scannerHelp', hardening: 'hardeningHelp',
   quarantine: 'quarantineHelp', inspector: 'settingsHelp',
 };
 
@@ -295,6 +297,7 @@ export default function App() {
             <p className="muted">{t('unknownTotal')}</p>
           </Panel>{results()}
         </>}
+        {view === 'hardening' && <HardeningView native={native} t={t} formatNumber={n}/>}
         {view === 'quarantine' && <>
           <div className="warning"><Archive size={18}/><span>{t('vaultInfo')}</span></div>
           {!vault.length
