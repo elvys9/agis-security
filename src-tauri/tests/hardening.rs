@@ -1,4 +1,6 @@
 use aegis_engine::hardening::{evaluate, Catalog, Probe, ProbeValue, Rule, Status};
+#[cfg(windows)]
+use aegis_engine::hardening::WindowsRegistryProbe;
 use std::collections::HashMap;
 
 struct FakeProbe {
@@ -116,4 +118,13 @@ fn bundled_rules_are_original_sourced_and_explicit_about_uncertainty() {
     assert_eq!(catalog.rules.len(), 5);
     assert!(catalog.rules.iter().all(|rule| rule.source_url.starts_with("https://learn.microsoft.com/")));
     assert_eq!(catalog.rules.iter().filter(|rule| rule.verify).count(), 2);
+}
+
+#[cfg(windows)]
+#[test]
+fn native_registry_probe_reads_without_admin_or_writes() {
+    let catalog = Catalog::parse(include_str!("../../catalog/rules.json")).unwrap();
+    let report = evaluate(&catalog, &WindowsRegistryProbe);
+    assert_eq!(report.total, catalog.rules.len());
+    assert_eq!(report.results.len(), catalog.rules.len());
 }
