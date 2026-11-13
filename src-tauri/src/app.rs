@@ -1,4 +1,4 @@
-use crate::{definitions::Definitions, scanner, quarantine::{Vault, VaultEntry}, watcher, updater, hardening};
+use crate::{definitions::Definitions, scanner, quarantine::{Vault, VaultEntry}, watcher, updater, hardening, local_llm};
 use anyhow::{anyhow, Context, Result};
 use serde::Serialize;
 use std::{collections::HashMap, path::PathBuf, sync::{Arc, Mutex, RwLock, atomic::{AtomicBool, AtomicU64, Ordering}}, time::{Duration, Instant}};
@@ -69,6 +69,16 @@ fn record(app: &tauri::AppHandle, engine: &Engine, path: &std::path::Path, resul
     tauri::async_runtime::spawn_blocking(hardening::audit_system)
         .await.map_err(|error| error.to_string())?
         .map_err(|error| error.to_string())
+}
+#[tauri::command] async fn explain_hardening(language: String, app: tauri::AppHandle) -> Result<local_llm::ExplanationResponse, String> {
+    if !["en", "it", "fr", "de", "zh-CN", "ru"].contains(&language.as_str()) {
+        return Err("Unsupported language".into());
+    }
+    let resources = app.path().resource_dir().map_err(|error| error.to_string())?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let report = hardening::audit_system().map_err(|error| error.to_string())?;
+        Ok(local_llm::explain_bundled(report, &language, &resources))
+    }).await.map_err(|error| error.to_string())?
 }
 #[tauri::command] fn set_ui_language(language: String, app: tauri::AppHandle, engine: tauri::State<'_, Shared>) -> Result<(), String> {
     if !["en", "it", "fr", "de", "zh-CN", "ru"].contains(&language.as_str()) { return Err("Unsupported language".into()); }
@@ -213,7 +223,7 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init()).plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, None))
         .manage(engine.clone())
-        .invoke_handler(tauri::generate_handler![get_status, set_ui_language, audit_hardening, get_scan_snapshot, get_findings, start_scan, pause_scan, cancel_scan, list_quarantine, quarantine_file, restore_quarantine, delete_quarantine, set_watcher, check_updates])
+        .invoke_handler(tauri::generate_handler![get_status, set_ui_language, audit_hardening, explain_hardening, get_scan_snapshot, get_findings, start_scan, pause_scan, cancel_scan, list_quarantine, quarantine_file, restore_quarantine, delete_quarantine, set_watcher, check_updates])
         .setup(|app| {
             use tauri::{menu::{Menu, MenuItem}, tray::{TrayIconBuilder, TrayIconEvent, MouseButton, MouseButtonState}};
             let words = native_text("en");
