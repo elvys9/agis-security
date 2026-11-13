@@ -5,6 +5,7 @@ pub mod platform;
 pub mod watcher;
 pub mod updater;
 pub mod hardening;
+pub mod explanation;
 #[cfg(feature = "desktop")]
 mod app;
 #[cfg(feature = "desktop")]
