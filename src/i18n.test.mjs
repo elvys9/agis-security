@@ -50,3 +50,20 @@ test('read-only hardening controls and all eight outcomes are translated', () =>
     }
   }
 });
+
+test('local explanation and deterministic fallback have labels in all six languages', () => {
+  const keys = [
+    'hardeningExplain', 'hardeningExplaining', 'hardeningPlainTitle',
+    'hardeningAiTitle', 'hardeningAiCaution', 'hardeningModelInfo',
+    'hardeningDifferentList', 'hardeningUncertainList', 'hardeningNoDifferences',
+    'hardeningNoUncertainties', 'hardeningMatchingCount',
+    'Generated', 'MissingAssets', 'IntegrityFailed', 'Unavailable',
+    'TimedOut', 'InvalidResponse',
+  ];
+  for (const { code } of languages) {
+    for (const key of keys) {
+      assert.ok(messages[code][key]?.trim(), code + ':' + key);
+      assert.notEqual(translate(code, key), key, code + ':' + key);
+    }
+  }
+});

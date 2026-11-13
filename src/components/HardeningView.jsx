@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { ClipboardCheck, CircleAlert } from 'lucide-react';
+import { ClipboardCheck, CircleAlert, Sparkles } from 'lucide-react';
 
 const PAGE_SIZE = 25;
 const STATUS_TONE = {
@@ -14,28 +14,60 @@ const STATUS_TONE = {
   UnknownEffectiveState: 'amber',
 };
 
-export default function HardeningView({ native, t, formatNumber }) {
+export default function HardeningView({ native, language, t, formatNumber }) {
   const [report, setReport] = useState(null);
   const [running, setRunning] = useState(false);
+  const [explaining, setExplaining] = useState(false);
+  const [explanation, setExplanation] = useState(null);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
+  const requestVersion = useRef(0);
+
+  useEffect(() => {
+    requestVersion.current += 1;
+    setExplanation(null);
+  }, [language]);
 
   async function runAudit() {
     if (!native || running) return;
+    const version = ++requestVersion.current;
     setRunning(true);
     setError('');
     setReport(null);
+    setExplanation(null);
     setPage(0);
     try {
-      setReport(await invoke('audit_hardening'));
+      const result = await invoke('audit_hardening');
+      if (version === requestVersion.current) setReport(result);
     } catch (cause) {
-      setError(String(cause));
+      if (version === requestVersion.current) setError(String(cause));
     } finally {
       setRunning(false);
     }
   }
 
+  async function explainResults() {
+    if (!native || !report || explaining || running) return;
+    const version = ++requestVersion.current;
+    setExplaining(true);
+    setError('');
+    setExplanation(null);
+    try {
+      const result = await invoke('explain_hardening', { language });
+      if (version === requestVersion.current) {
+        setReport(result.report);
+        setExplanation(result);
+        setPage(0);
+      }
+    } catch (cause) {
+      if (version === requestVersion.current) setError(String(cause));
+    } finally {
+      setExplaining(false);
+    }
+  }
+
   const results = report?.results ?? [];
+  const byId = new Map(results.map(item => [item.id, item]));
   const first = page * PAGE_SIZE;
   const visible = results.slice(first, first + PAGE_SIZE);
   return <>
@@ -44,9 +76,15 @@ export default function HardeningView({ native, t, formatNumber }) {
       <div className="panel-heading"><h2><ClipboardCheck size={18}/>{t('hardening')}</h2></div>
       <div className="panel-body">
         <p className="intro">{t('hardeningIntro')}</p>
-        <button className="primary" disabled={!native || running} onClick={runAudit} aria-busy={running}>
-          <ClipboardCheck/>{t(running ? 'hardeningRunning' : 'hardeningRun')}
-        </button>
+        <div className="actions">
+          <button className="primary" disabled={!native || running || explaining} onClick={runAudit} aria-busy={running}>
+            <ClipboardCheck/>{t(running ? 'hardeningRunning' : 'hardeningRun')}
+          </button>
+          {report && <button disabled={!native || running || explaining} onClick={explainResults} aria-busy={explaining}>
+            <Sparkles/>{t(explaining ? 'hardeningExplaining' : 'hardeningExplain')}
+          </button>}
+        </div>
+        {report && <p className="muted">{t('hardeningModelInfo')}</p>}
         {!native && <p className="muted">{t('hardeningPreview')}</p>}
         {error && <div className="warning" role="alert"><CircleAlert size={18}/>{error}</div>}
       </div>
@@ -57,6 +95,31 @@ export default function HardeningView({ native, t, formatNumber }) {
         <div className="metric"><span>{t('hardeningCompliant')}</span><strong>{formatNumber(report.compliant)}</strong></div>
         <div className="metric"><span>{t('hardeningNonCompliant')}</span><strong>{formatNumber(report.non_compliant)}</strong></div>
         <div className="metric"><span>{t('hardeningInconclusive')}</span><strong>{formatNumber(report.inconclusive)}</strong></div>
+      </div>
+    </section>}
+    {explanation && <section className="panel" aria-live="polite">
+      <div className="panel-heading"><h2>{t('hardeningPlainTitle')}</h2></div>
+      <div className="panel-body hardening-report">
+        <p>{t('hardeningMatchingCount', { count: formatNumber(explanation.plain.matching_count) })}</p>
+        <div className="hardening-report-groups">
+          <div><h3>{t('hardeningDifferentList')}</h3>
+            {explanation.plain.differing_ids.length ? <ul>{explanation.plain.differing_ids.map(id =>
+              <li key={id}>{byId.get(id)?.title ?? id}</li>)}</ul> : <p className="muted">{t('hardeningNoDifferences')}</p>}
+          </div>
+          <div><h3>{t('hardeningUncertainList')}</h3>
+            {explanation.plain.uncertain_ids.length ? <ul>{explanation.plain.uncertain_ids.map(id =>
+              <li key={id}>{byId.get(id)?.title ?? id} · {t(byId.get(id)?.status ?? 'UnknownEffectiveState')}</li>)}</ul>
+              : <p className="muted">{t('hardeningNoUncertainties')}</p>}
+          </div>
+        </div>
+        <p className="muted" role="status">{t(explanation.model_state)}</p>
+        {explanation.ai && <div className="hardening-ai">
+          <h3><Sparkles size={17}/>{t('hardeningAiTitle')}</h3>
+          <p>{explanation.ai.summary}</p>
+          {explanation.ai.advice.length > 0 && <ul>{explanation.ai.advice.map(advice =>
+            <li key={advice.rule_id}><strong>{byId.get(advice.rule_id)?.title ?? advice.rule_id}:</strong> {advice.text}</li>)}</ul>}
+          <p className="muted">{t('hardeningAiCaution')}</p>
+        </div>}
       </div>
     </section>}
     <section className="panel">

@@ -297,7 +297,7 @@ export default function App() {
             <p className="muted">{t('unknownTotal')}</p>
           </Panel>{results()}
         </>}
-        {view === 'hardening' && <HardeningView native={native} t={t} formatNumber={n}/>}
+        {view === 'hardening' && <HardeningView native={native} language={language} t={t} formatNumber={n}/>}
         {view === 'quarantine' && <>
           <div className="warning"><Archive size={18}/><span>{t('vaultInfo')}</span></div>
           {!vault.length
