@@ -25,15 +25,16 @@ The interface starts in English. Use the **Language** menu in the header to choo
 | Definition updates | HTTPS download, Ed25519 verification, version checks, and atomic activation are implemented. The endpoint and public key are deliberately blank, so remote updates are currently disabled. |
 | Optional service | A separately built, manually installed LocalSystem service can run scheduled scans and write a protected log. It is not bundled by the desktop installer and has no GUI command channel. |
 | Read-only hardening audit | Evaluates five original, Microsoft-sourced registry-policy rules through a native Rust probe. The separate Hardening audit page shows observed values, inconclusive states, and source URLs. No setting is changed and no PowerShell process is launched. |
+| Local explanations (0.1.2 source) | The Hardening page can run an included GGUF model on demand to explain an audit in plain language. A deterministic report remains available if inference fails; generated prose never changes the audit. The published 0.1.1 installer predates this feature. |
 
 Heuristic flags are evidence for review, not proof of malware. The bundled database includes only the EICAR test hash and a harmless YARA integration fixture; it is **not** a production threat-intelligence feed. Errors and incomplete analyses are shown rather than interpreted as clean results.
 
-The hardening audit is available in the current source code. The published 0.1.1 installer predates this feature and does not contain the hardening page; build the desktop app from source to try it.
+The hardening audit and local explanation are available in the current source code. The published 0.1.1 installer predates them; build the desktop app from source to try them. The build downloads and verifies an approximately 1.12 GB model plus a Windows x64 CPU runtime, then includes both in the new installer. The installed app does not download a model to explain results.
 
 ## Important limitations
 
 - There is no minifilter, WFP driver, kernel anti-tampering, pre-execution blocking, ONNX model, process-memory scan, ransomware rollback, or persistence-remediation engine.
-- The hardening page currently covers only five registry-policy rules. It does not assess all Windows security settings, prove effective protection, apply changes, or provide LLM explanations yet. It does not accelerate antivirus scanning.
+- The hardening page currently covers only five registry-policy rules. It does not assess all Windows security settings, prove effective protection, or apply changes. Local AI text can be inaccurate and does not accelerate antivirus scanning.
 - The user-mode watcher can miss events and cannot scan locked or inaccessible files. A successful scan does not guarantee the device is safe.
 - The installer and application are not code-signed. They have not completed clean-machine Windows 10/11 installation, upgrade, uninstall, performance, independent security, or antivirus-efficacy validation.
 - The Windows vault is designed for reversible containment; physical secure erasure on SSDs cannot be guaranteed. On macOS/Linux the current vault conservatively retains the original file and must not be treated as isolation.
@@ -74,4 +75,4 @@ docs/                Architecture, testing, distribution, workspace audit
 
 Dependencies are locked in package-lock.json and the two Cargo.lock files. Generated output, local toolchains, and the archived C++/WPF prototype are excluded from Git.
 
-Read the [architecture](docs/architecture.md), [hardening audit guide](docs/hardening-audit.md), [primary-antivirus engineering guide](docs/primary-antivirus-and-hardening-plan.md), [distribution notes](docs/distribution.md), and [workspace audit](docs/workspace-audit.md) for component boundaries and release gates. This repository has no open-source license at present; public visibility does not grant general reuse rights.
+Read the [architecture](docs/architecture.md), [hardening audit guide](docs/hardening-audit.md), [local model guide](docs/local-llm.md), [primary-antivirus engineering guide](docs/primary-antivirus-and-hardening-plan.md), [distribution notes](docs/distribution.md), and [workspace audit](docs/workspace-audit.md) for component boundaries and release gates. This repository has no open-source license at present; public visibility does not grant general reuse rights.

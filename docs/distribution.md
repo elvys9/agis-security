@@ -1,4 +1,4 @@
-# Windows distribution: Aegis Security 0.1.1
+# Windows distribution: Aegis Security 0.1.2 source
 
 This is an **unsigned prerelease**, not a certified antivirus or a public-production release. The supported packaging path is NSIS for Windows 10/11 x64. No installer is executed by the build workflow.
 
@@ -10,7 +10,7 @@ From the repository root, install the locked npm dependencies and use a Windows 
 powershell -NoProfile -File installer/build-windows.ps1
 ```
 
-Tauri runs `npm run build` and bundles `dist`. Outputs normally live under `src-tauri/target/release/bundle/nsis` (or the configured Cargo target directory). WebView2 uses the download bootstrapper when the runtime is missing: first installation can require Internet access. An offline distribution needs an explicitly bundled offline WebView2 installer and corresponding license/size review.
+The wrapper first downloads and verifies the pinned local language model and Windows x64 CPU runtime, then Tauri runs `npm run build` and bundles `dist` plus the model resources. The model alone is 1,117,320,736 bytes; allow several GB of build and install space. See the [local model guide](./local-llm.md) for exact hashes, licenses and fallback behavior. Outputs normally live under `src-tauri/target/release/bundle/nsis` (or the configured Cargo target directory). WebView2 uses the download bootstrapper when the runtime is missing: first installation can require Internet access. An offline distribution needs an explicitly bundled offline WebView2 installer and corresponding license/size review.
 
 ## Installation and privileges
 
@@ -37,6 +37,7 @@ powershell -NoProfile -File installer/build-windows.ps1 -Bundle msi
 ## Required release validation
 
 - Build from pinned dependencies; record artifact SHA-256 and dependency/license inventory.
+- Verify the model and runtime hashes, confirm their licenses and DLLs are physically in the NSIS package, and run the explanation on a disconnected VM without leaving a server process.
 - Install on clean supported Windows 10 and 11 VMs with a standard account; confirm setup-only UAC, an unelevated app token, WebView2 bootstrap and both shortcuts.
 - Test file/directory Explorer actions with spaces, Unicode and long paths, including a running single instance.
 - Test missing/blocked runtime, offline setup, installation cancellation, upgrade, repair and uninstall; verify vault preservation and menu removal.

@@ -5,6 +5,7 @@ Run from the repository root in PowerShell. Native compilation needs a Rust MSVC
 ~~~powershell
 npm ci
 node --test src/i18n.test.mjs
+node --test installer/prepare-llm.test.mjs
 npm run build
 npm run tauri -- build --bundles nsis
 ~~~
@@ -23,6 +24,8 @@ cargo test --manifest-path src-tauri/Cargo.toml --test hardening --no-default-fe
 The engine tests exercise harmless hash/PE/entropy/YARA fixtures, malformed files, vault encryption and restoration, Windows alternate streams, and an actual filesystem watcher event. The service tests cover configuration, security checks, bounded queues, and logs. None of these tests installs or starts a driver or service.
 
 The hardening tests use a simulated `Probe` for status logic and a read-only Windows registry probe. They never change a security setting. In the desktop app, open **Hardening audit** and select **Run audit**; missing keys, denied reads, type mismatches, and rules marked for verification must not be shown as a clean system.
+
+The local explanation tests check that raw registry values are absent from prompts, that invented rule IDs and malformed output are rejected, and that a missing model leaves the simple report available. To exercise the real bundled model during the Rust test suite, set `AEGIS_TEST_LLM_RESOURCES` to the absolute directory containing `llm/model.gguf` and `llm/runtime/llama-server.exe`. The packaging preflight accepts `AEGIS_TEST_LLM_ASSET_ROOT` for a prepared `src-tauri/llm-assets` folder. See [local model testing](./local-llm.md).
 
 For a manual desktop check without an installer, run `npm run tauri -- dev`. Confirm the language menu switches every view and persists after restarting. Run Quick Scan, a small Custom Scan, pause/resume/stop, and inspect the error and incomplete-analysis counters. In the browser-only preview, native file actions are intentionally disabled.
 

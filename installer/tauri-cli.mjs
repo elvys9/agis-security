@@ -1,6 +1,6 @@
 // Prefer the isolated project toolchain; do not alter the user's global PATH.
 import { existsSync } from 'node:fs';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -16,6 +16,16 @@ if (existsSync(path.join(tools, 'cargo', 'bin'))) {
 }
 const cli = path.join(root, 'node_modules', '@tauri-apps', 'cli', 'tauri.js');
 if (!existsSync(cli)) { console.error('Dipendenze mancanti. Eseguire npm install prima della build Tauri.'); process.exit(1); }
+if (['dev', 'build'].includes(process.argv[2])) {
+  const prepared = spawnSync('powershell.exe', [
+    '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
+    '-File', path.join(root, 'installer', 'prepare-llm.ps1'),
+  ], { cwd: root, env, stdio: 'inherit', shell: false });
+  if (prepared.error || prepared.status !== 0) {
+    console.error(prepared.error?.message || 'Preparazione del modello locale non riuscita.');
+    process.exit(prepared.status || 1);
+  }
+}
 const child = spawn(process.execPath, [cli, ...process.argv.slice(2)], { cwd: root, env, stdio: 'inherit', shell: false });
 child.on('exit', code => process.exit(code ?? 1));
 child.on('error', error => { console.error(error.message); process.exit(1); });

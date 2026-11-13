@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Aegis Security",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "identifier": "com.aegis.security",
   "mainBinaryName": "aegis-security",
   "build": {
@@ -16,6 +16,7 @@
   },
   "bundle": {
     "active": true,
+    "resources": {"llm-assets/": "llm/"},
     "targets": ["nsis"],
     "category": "Utility",
     "shortDescription": "Aegis Security — unsigned prerelease",

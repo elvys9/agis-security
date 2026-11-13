@@ -4,6 +4,7 @@
 /.tools/
 /dist/
 /src-tauri/target/
+/src-tauri/llm-assets/
 /service-daemon/target/
 /src-tauri/gen/
 /archive/
