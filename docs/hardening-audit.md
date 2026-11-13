@@ -1,10 +1,10 @@
 # Native read-only hardening audit
 
-This document describes the native hardening audit in the current source code. The published 0.1.1 installer predates this feature and does not contain the audit. Aegis remains an experimental scanner, not a primary antivirus.
+This document describes the native hardening audit in the current source code. The published 0.1.1 installer predates this feature and does not contain the audit. ThreatLens remains an experimental scanner, not a primary antivirus.
 
 ## Scope and architecture
 
-- [catalog/rules.json](../catalog/rules.json) contains five original rules written for Aegis. Every rule has a Microsoft Learn source URL. No HardeningKitty, CIS, or third-party finding list is copied into the product.
+- [catalog/rules.json](../catalog/rules.json) contains five original rules written for ThreatLens. Every rule has a Microsoft Learn source URL. No HardeningKitty, CIS, or third-party finding list is copied into the product.
 - [hardening.rs](../src-tauri/src/hardening.rs) parses a bounded catalog, evaluates rules through a `Probe` trait, and implements a Windows registry reader behind `cfg(windows)`. The reader uses `KEY_READ | KEY_WOW64_64KEY`; it never writes registry values or launches a process.
 - [app.rs](../src-tauri/src/app.rs) exposes `audit_hardening` through a blocking worker so the WebView remains responsive. [HardeningView.jsx](../src/components/HardeningView.jsx) displays the report separately from antivirus scanning and has no remediation action.
 - No new crate or npm dependency was introduced. The existing `windows-sys` dependency gained its Registry API feature.

@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Windows x64 only; Aegis stays a standard-user process.
+- Windows x64 only; ThreatLens stays a standard-user process.
 - No remote inference, runtime model download, registry write, automatic remediation, or changes to scanner/quarantine/watcher/updater/service.
 - Package pinned assets only after SHA-256 and size verification; never commit the GGUF to Git.
 - Preserve all eight hardening states, especially Missing/AccessDenied/Unknown, as inconclusive where appropriate.
@@ -24,7 +24,7 @@
 - A busy/wrong local port cannot redirect audit data to an unrelated service; authenticate the sidecar.
 - Malformed, oversized, duplicate-ID, or invented-ID model output is rejected.
 - A language change or second audit does not display stale model prose as if it belonged to the new report.
-- Closing or crashing Aegis does not leave a persistent inference service.
+- Closing or crashing ThreatLens does not leave a persistent inference service.
 
 ---
 

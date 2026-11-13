@@ -60,7 +60,7 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.lang = language;
-    try { localStorage.setItem('aegis.language', language); } catch { /* Browser storage may be disabled. */ }
+    try { localStorage.setItem('threatlens.language', language); } catch { /* Browser storage may be disabled. */ }
     if (native) invoke('set_ui_language', { language }).catch(reportError);
   }, [language]);
 
@@ -206,7 +206,7 @@ export default function App() {
     : translateEngineText(language, notice?.raw);
   return <div className="app">
     <aside>
-      <div className="brand"><ShieldCheck size={32}/><div><strong>Aegis Security</strong><span>Endpoint security</span></div></div>
+      <div className="brand"><ShieldCheck size={32}/><div><strong>ThreatLens</strong><span>Endpoint security</span></div></div>
       <nav aria-label={t('dashboard')}>
         {NAV.map(([id, title, Icon]) => <button key={id} aria-current={view === id ? 'page' : undefined} onClick={() => setView(id)}>
           <Icon size={18}/>{t(title)}

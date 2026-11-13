@@ -1,5 +1,5 @@
 [package]
-name = "aegis-security"
+name = "threatlens"
 version = "0.1.2"
 edition = "2021"
 
@@ -8,7 +8,7 @@ name = "aegis_engine"
 crate-type = ["rlib"]
 
 [[bin]]
-name = "aegis-security"
+name = "threatlens"
 path = "src/main.rs"
 required-features = ["desktop"]
 

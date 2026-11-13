@@ -19,6 +19,8 @@ test('all six locales cover every interface message and interpolation field', ()
 
 test('saved language and unsupported values have predictable defaults', () => {
   assert.equal(initialLanguage({ getItem: () => 'zh-CN' }), 'zh-CN');
+  assert.equal(initialLanguage({ getItem: key => key === 'aegis.language' ? 'it' : null }), 'it');
+  assert.equal(initialLanguage({ getItem: key => key === 'threatlens.language' ? 'fr' : key === 'aegis.language' ? 'it' : null }), 'fr');
   assert.equal(initialLanguage({ getItem: () => 'unknown' }), 'en');
   assert.equal(initialLanguage({ getItem: () => { throw Error('disabled'); } }), 'en');
   assert.equal(translate('de', 'restored', { path: 'C:\\sample.exe' }), 'Datei wiederhergestellt: C:\\sample.exe');

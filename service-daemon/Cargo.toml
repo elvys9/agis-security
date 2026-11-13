@@ -10,7 +10,7 @@ serde_json = "1"
 crossbeam-channel = "0.5"
 walkdir = "2"
 notify = "8"
-aegis-engine = { package = "aegis-security", path = "../src-tauri", default-features = false }
+aegis-engine = { package = "threatlens", path = "../src-tauri", default-features = false }
 
 [target.'cfg(windows)'.dependencies]
 windows-service = "0.8"

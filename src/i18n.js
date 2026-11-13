@@ -44,7 +44,7 @@ export const messages = {
     restore: 'Restore', delete: 'Delete permanently', restoreTitle: 'Restore file',
     deleteTitle: 'Delete permanently', restoreConfirm: 'Restore to the original path? This file may contain harmful code.\n{path}',
     deleteConfirm: 'Permanently delete this quarantined content?\n{path}',
-    autostart: 'Start with Windows', autostartDetails: 'Launch Aegis Security when you sign in.',
+    autostart: 'Start with Windows', autostartDetails: 'Launch ThreatLens when you sign in.',
     localVault: 'Local vault', currentUserRights: 'The engine uses your account permissions. Unreadable files are counted as read errors.',
     sessionEvents: 'Session events', noEvents: 'No events received.', unavailable: 'Unavailable',
     closeNotice: 'Dismiss notification', partialData: 'Partial data: {details}', partialUpdate: 'Partial refresh: {details}',
@@ -130,7 +130,7 @@ export const messages = {
     restore: 'Ripristina', delete: 'Elimina definitivamente', restoreTitle: 'Ripristina file',
     deleteTitle: 'Elimina definitivamente', restoreConfirm: 'Ripristinare nel percorso originale? Il file potrebbe contenere codice dannoso.\n{path}',
     deleteConfirm: 'Eliminare definitivamente il contenuto in quarantena?\n{path}',
-    autostart: 'Avvio con Windows', autostartDetails: 'Avvia Aegis Security all’accesso dell’utente.',
+    autostart: 'Avvio con Windows', autostartDetails: 'Avvia ThreatLens all’accesso dell’utente.',
     localVault: 'Archivio locale', currentUserRights: 'Il motore usa i permessi dell’utente. I file non leggibili sono conteggiati come errori.',
     sessionEvents: 'Eventi della sessione', noEvents: 'Nessun evento ricevuto.', unavailable: 'Non disponibile',
     closeNotice: 'Chiudi notifica', partialData: 'Dati parziali: {details}', partialUpdate: 'Aggiornamento parziale: {details}',
@@ -217,7 +217,7 @@ export const messages = {
     restore: 'Restaurer', delete: 'Supprimer définitivement', restoreTitle: 'Restaurer le fichier',
     deleteTitle: 'Supprimer définitivement', restoreConfirm: 'Restaurer à l’emplacement d’origine ? Ce fichier peut être dangereux.\n{path}',
     deleteConfirm: 'Supprimer définitivement ce contenu en quarantaine ?\n{path}',
-    autostart: 'Démarrer avec Windows', autostartDetails: 'Lancer Aegis Security à l’ouverture de session.',
+    autostart: 'Démarrer avec Windows', autostartDetails: 'Lancer ThreatLens à l’ouverture de session.',
     localVault: 'Coffre local', currentUserRights: 'Le moteur utilise vos autorisations. Les fichiers illisibles sont comptés comme erreurs.',
     sessionEvents: 'Événements de la session', noEvents: 'Aucun événement reçu.', unavailable: 'Indisponible',
     closeNotice: 'Fermer la notification', partialData: 'Données partielles : {details}', partialUpdate: 'Actualisation partielle : {details}',
@@ -304,7 +304,7 @@ export const messages = {
     restore: 'Wiederherstellen', delete: 'Endgültig löschen', restoreTitle: 'Datei wiederherstellen',
     deleteTitle: 'Endgültig löschen', restoreConfirm: 'Am ursprünglichen Ort wiederherstellen? Die Datei kann schädlich sein.\n{path}',
     deleteConfirm: 'Diesen Quarantäneinhalt endgültig löschen?\n{path}',
-    autostart: 'Mit Windows starten', autostartDetails: 'Aegis Security bei der Anmeldung starten.',
+    autostart: 'Mit Windows starten', autostartDetails: 'ThreatLens bei der Anmeldung starten.',
     localVault: 'Lokaler Tresor', currentUserRights: 'Die Engine nutzt Ihre Berechtigungen. Unlesbare Dateien werden als Fehler gezählt.',
     sessionEvents: 'Sitzungsereignisse', noEvents: 'Keine Ereignisse empfangen.', unavailable: 'Nicht verfügbar',
     closeNotice: 'Benachrichtigung schließen', partialData: 'Unvollständige Daten: {details}', partialUpdate: 'Teilweise aktualisiert: {details}',
@@ -391,7 +391,7 @@ export const messages = {
     restore: '恢复', delete: '永久删除', restoreTitle: '恢复文件',
     deleteTitle: '永久删除', restoreConfirm: '恢复到原路径？此文件可能包含有害代码。\n{path}',
     deleteConfirm: '永久删除此隔离内容？\n{path}',
-    autostart: '随 Windows 启动', autostartDetails: '登录时启动 Aegis Security。',
+    autostart: '随 Windows 启动', autostartDetails: '登录时启动 ThreatLens。',
     localVault: '本地隔离库', currentUserRights: '引擎使用当前账户权限。无法读取的文件会计入错误数。',
     sessionEvents: '会话事件', noEvents: '未收到事件。', unavailable: '不可用',
     closeNotice: '关闭通知', partialData: '部分数据不可用：{details}', partialUpdate: '部分刷新失败：{details}',
@@ -478,7 +478,7 @@ export const messages = {
     restore: 'Восстановить', delete: 'Удалить навсегда', restoreTitle: 'Восстановить файл',
     deleteTitle: 'Удалить навсегда', restoreConfirm: 'Восстановить по исходному пути? Файл может быть опасен.\n{path}',
     deleteConfirm: 'Безвозвратно удалить содержимое карантина?\n{path}',
-    autostart: 'Запуск с Windows', autostartDetails: 'Запускать Aegis Security при входе в систему.',
+    autostart: 'Запуск с Windows', autostartDetails: 'Запускать ThreatLens при входе в систему.',
     localVault: 'Локальное хранилище', currentUserRights: 'Движок использует права вашей учётной записи. Недоступные файлы считаются ошибками.',
     sessionEvents: 'События сеанса', noEvents: 'Событий нет.', unavailable: 'Недоступно',
     closeNotice: 'Закрыть уведомление', partialData: 'Часть данных недоступна: {details}', partialUpdate: 'Частичное обновление: {details}',
@@ -533,7 +533,7 @@ export const messages = {
 
 export function initialLanguage(storage = globalThis.localStorage) {
   try {
-    const saved = storage?.getItem('aegis.language');
+    const saved = storage?.getItem('threatlens.language') ?? storage?.getItem('aegis.language');
     if (messages[saved]) return saved;
   } catch { /* Storage can be unavailable in restricted browser previews. */ }
   return 'en';

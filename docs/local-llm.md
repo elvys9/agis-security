@@ -1,6 +1,6 @@
 # Bundled local explanation model
 
-The Windows x64 **0.1.2 source build** includes a local model for the read-only Hardening audit. The published 0.1.1 installer does not include this feature. The model produces short, optional explanations; the Rust audit engine remains the only source of statuses and counts. Aegis is still an experimental scanner, not a primary antivirus.
+The Windows x64 **0.1.2 source build** includes a local model for the read-only Hardening audit. The published 0.1.1 installer does not include this feature. The model produces short, optional explanations; the Rust audit engine remains the only source of statuses and counts. ThreatLens is still an experimental scanner, not a primary antivirus.
 
 ## Assets and licenses
 

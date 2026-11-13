@@ -1,6 +1,6 @@
 # Current architecture and EPP/EDR roadmap
 
-Aegis Security is currently a **standard-user Tauri application**. Its modular structure is inspired by endpoint security products, but it does not contain proprietary Malwarebytes components or a certified kernel driver. The optional SCM service is independent of the GUI and does not process GUI commands.
+ThreatLens is currently a **standard-user Tauri application**. Its modular structure is inspired by endpoint security products, but it does not contain proprietary Malwarebytes components or a certified kernel driver. The optional SCM service is independent of the GUI and does not process GUI commands.
 
 ~~~text
 Standard user

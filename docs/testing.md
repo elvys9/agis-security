@@ -31,7 +31,7 @@ For a manual desktop check without an installer, run `npm run tauri -- dev`. Con
 
 ## Local native-launch smoke test (2026-11-11)
 
-On Windows 11 Pro build 26200, `npm run tauri -- dev` started Vite on `127.0.0.1:1420`, compiled the Rust Debug executable, and launched `aegis-security.exe`. Process inspection found a responding interactive window titled **Aegis Security** and the Debug data root under `%LOCALAPPDATA%\AegisSecurity-Dev`. The app was left running for hands-on testing. This confirms native startup only: no buttons, scan, quarantine action, installer, service, or VM deployment were exercised during this smoke test.
+On Windows 11 Pro build 26200, `npm run tauri -- dev` started Vite on `127.0.0.1:1420`, compiled the Rust Debug executable, and launched `threatlens.exe`. Process inspection found a responding interactive window titled **ThreatLens** and the Debug data root under `%LOCALAPPDATA%\AegisSecurity-Dev`. The app was left running for hands-on testing. This confirms native startup only: no buttons, scan, quarantine action, installer, service, or VM deployment were exercised during this smoke test.
 
 Test quarantine and restore only on a **disposable file** and compare SHA-256 before and after with `Get-FileHash`. Other installed antivirus products may intercept the EICAR test string; do not disable them or run live malware merely to validate the UI.
 

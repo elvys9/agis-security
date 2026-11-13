@@ -28,38 +28,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "aegis-security"
-version = "0.1.2"
-dependencies = [
- "aes-gcm",
- "anyhow",
- "chrono",
- "crossbeam-channel",
- "dirs 6.0.0",
- "ed25519-dalek",
- "hex",
- "md-5",
- "notify",
- "rand 0.8.8",
- "reqwest 0.12.28",
- "serde",
- "serde_json",
- "sha2",
- "tauri",
- "tauri-build",
- "tauri-plugin-autostart",
- "tauri-plugin-dialog",
- "tauri-plugin-notification",
- "tauri-plugin-single-instance",
- "tempfile",
- "uuid",
- "walkdir",
- "windows-sys 0.59.0",
- "yara-x",
- "zeroize",
-]
-
-[[package]]
 name = "aes"
 version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5170,6 +5138,38 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.9",
+]
+
+[[package]]
+name = "threatlens"
+version = "0.1.2"
+dependencies = [
+ "aes-gcm",
+ "anyhow",
+ "chrono",
+ "crossbeam-channel",
+ "dirs 6.0.0",
+ "ed25519-dalek",
+ "hex",
+ "md-5",
+ "notify",
+ "rand 0.8.8",
+ "reqwest 0.12.28",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-autostart",
+ "tauri-plugin-dialog",
+ "tauri-plugin-notification",
+ "tauri-plugin-single-instance",
+ "tempfile",
+ "uuid",
+ "walkdir",
+ "windows-sys 0.59.0",
+ "yara-x",
+ "zeroize",
 ]
 
 [[package]]

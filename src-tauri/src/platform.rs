@@ -53,7 +53,7 @@ pub fn private_root() -> Result<PathBuf> {
     #[cfg(all(windows,debug_assertions))] let root = dirs::data_local_dir().context("No user data directory")?.join("AegisSecurity-Dev");
     #[cfg(all(windows,not(debug_assertions)))] let root = {
         let users=PathBuf::from(std::env::var_os("ProgramData").context("ProgramData missing")?).join("AegisSecurity").join("Users");
-        if !users.is_dir() { bail!("Installa Aegis Security per preparare la cartella dati protetta in ProgramData."); }
+        if !users.is_dir() { bail!("Installa ThreatLens per preparare la cartella dati protetta in ProgramData."); }
         check_path(&users)?;
         users.join(win::sid_string()?)
     };
@@ -112,7 +112,7 @@ mod win {
         let mut elevation=0u32;let mut size=0u32;
         let ok=GetTokenInformation(token,20,(&mut elevation as *mut u32).cast(),4,&mut size);CloseHandle(token);
         if ok==0 || size!=4 {bail!("Impossibile verificare i privilegi del processo");}
-        if elevation!=0 || sid_string()?=="S-1-5-18" {bail!("Avvia Aegis Security senza Esegui come amministratore. Solo installer e servizio richiedono elevazione.");}
+        if elevation!=0 || sid_string()?=="S-1-5-18" {bail!("Avvia ThreatLens senza Esegui come amministratore. Solo installer e servizio richiedono elevazione.");}
         Ok(())
     } }
     fn user() -> Result<Vec<usize>> { unsafe {

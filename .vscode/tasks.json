@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Aegis: avvia desktop (Tauri)",
+      "label": "ThreatLens: avvia desktop (Tauri)",
       "type": "shell",
       "command": "npm.cmd",
       "args": ["run", "tauri", "--", "dev"],
@@ -10,7 +10,7 @@
       "problemMatcher": []
     },
     {
-      "label": "Aegis: crea installer NSIS",
+      "label": "ThreatLens: crea installer NSIS",
       "type": "shell",
       "command": "npm.cmd",
       "args": ["run", "tauri", "--", "build", "--bundles", "nsis"],

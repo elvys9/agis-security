@@ -50,5 +50,5 @@ foreach ($file in @($destination, (Join-Path $dataDir 'service.json'))) {
     $fileAcl.SetOwner([Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'))
     Set-Acl -LiteralPath $file -AclObject $fileAcl
 }
-New-Service -Name $serviceName -DisplayName 'Aegis Security scanner (optional)' -BinaryPathName ('"' + $destination + '"') -StartupType Manual -Description 'Optional user-mode scheduled scanner. Logs findings; does not block execution or quarantine files.' | Out-Null
+New-Service -Name $serviceName -DisplayName 'ThreatLens scanner (optional)' -BinaryPathName ('"' + $destination + '"') -StartupType Manual -Description 'Optional user-mode scheduled scanner. Logs findings; does not block execution or quarantine files.' | Out-Null
 Write-Output "Installed as LocalSystem, stopped. Review $dataDir\service.json, choose absolute local roots, then explicitly run Start-Service AegisSecurity."

@@ -1,6 +1,6 @@
-# Aegis Security
+# ThreatLens
 
-**Aegis Security is an experimental Windows desktop security application, not a certified antivirus.** It combines a React/Tauri interface with a Rust static file scanner, a user-mode folder watcher, an encrypted quarantine vault, and a separately buildable Windows service. The current signature database contains only integration-test indicators. Do not rely on this prerelease as your primary endpoint protection.
+**ThreatLens is an experimental Windows desktop security application, not a certified antivirus.** It combines a React/Tauri interface with a Rust static file scanner, a user-mode folder watcher, an encrypted quarantine vault, and a separately buildable Windows service. The current signature database contains only integration-test indicators. Do not rely on this prerelease as your primary endpoint protection.
 
 ## Download and try it
 
@@ -8,7 +8,7 @@ The [latest experimental release](https://github.com/elvys9/agis-security/releas
 
 1. Download the installer from the release's **Assets** section.
 2. Run setup; UAC is required for installation and removal. WebView2 may be downloaded if it is not already installed.
-3. Open Aegis Security from the Start menu as a standard user. Do not run the application itself as Administrator.
+3. Open ThreatLens from the Start menu as a standard user. Do not run the application itself as Administrator.
 4. Try **Quick Scan** or choose a small, harmless folder under **Select folder**. Review the error and incomplete-analysis counters after a scan.
 5. If you test quarantine and restore, use a disposable test file and compare its SHA-256 before and after restoration. Closing the window leaves the app in the system tray; choose **Exit** there to stop monitoring.
 
@@ -40,7 +40,7 @@ The hardening audit and local explanation are available in the current source co
 - The Windows vault is designed for reversible containment; physical secure erasure on SSDs cannot be guaranteed. On macOS/Linux the current vault conservatively retains the original file and must not be treated as isolation.
 - The service and GUI are independent. Installing the service requires a separate administrator-reviewed process described in [its README](service-daemon/README.md).
 
-Keep an established antivirus enabled while evaluating Aegis Security.
+Keep an established antivirus enabled while evaluating ThreatLens.
 
 ## Build from source
 

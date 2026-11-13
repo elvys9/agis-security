@@ -19,12 +19,12 @@ struct TrayMenu { show: tauri::menu::MenuItem<tauri::Wry>, quit: tauri::menu::Me
 struct NativeText { show: &'static str, quit: &'static str, tooltip: &'static str, alert: &'static str, review: &'static str }
 fn native_text(language: &str) -> NativeText {
     match language {
-        "it" => NativeText { show: "Apri Aegis Security", quit: "Esci e interrompi il monitoraggio", tooltip: "Aegis Security · monitoraggio user-mode", alert: "Aegis Security · rilevamento", review: "richiede verifica. Nessuna quarantena automatica." },
-        "fr" => NativeText { show: "Ouvrir Aegis Security", quit: "Quitter et arrêter la surveillance", tooltip: "Aegis Security · surveillance utilisateur", alert: "Aegis Security · détection", review: "à vérifier. Aucune mise en quarantaine automatique." },
-        "de" => NativeText { show: "Aegis Security öffnen", quit: "Beenden und Überwachung stoppen", tooltip: "Aegis Security · Benutzerüberwachung", alert: "Aegis Security · Fund", review: "muss geprüft werden. Keine automatische Quarantäne." },
-        "zh-CN" => NativeText { show: "打开 Aegis Security", quit: "退出并停止监控", tooltip: "Aegis Security · 用户模式监控", alert: "Aegis Security · 检测结果", review: "需要复核。不会自动隔离。" },
-        "ru" => NativeText { show: "Открыть Aegis Security", quit: "Выйти и остановить мониторинг", tooltip: "Aegis Security · мониторинг пользователя", alert: "Aegis Security · обнаружение", review: "требует проверки. Автоматического карантина нет." },
-        _ => NativeText { show: "Open Aegis Security", quit: "Exit and stop monitoring", tooltip: "Aegis Security · user-mode monitoring", alert: "Aegis Security · detection", review: "needs review. No automatic quarantine." },
+        "it" => NativeText { show: "Apri ThreatLens", quit: "Esci e interrompi il monitoraggio", tooltip: "ThreatLens · monitoraggio user-mode", alert: "ThreatLens · rilevamento", review: "richiede verifica. Nessuna quarantena automatica." },
+        "fr" => NativeText { show: "Ouvrir ThreatLens", quit: "Quitter et arrêter la surveillance", tooltip: "ThreatLens · surveillance utilisateur", alert: "ThreatLens · détection", review: "à vérifier. Aucune mise en quarantaine automatique." },
+        "de" => NativeText { show: "ThreatLens öffnen", quit: "Beenden und Überwachung stoppen", tooltip: "ThreatLens · Benutzerüberwachung", alert: "ThreatLens · Fund", review: "muss geprüft werden. Keine automatische Quarantäne." },
+        "zh-CN" => NativeText { show: "打开 ThreatLens", quit: "退出并停止监控", tooltip: "ThreatLens · 用户模式监控", alert: "ThreatLens · 检测结果", review: "需要复核。不会自动隔离。" },
+        "ru" => NativeText { show: "Открыть ThreatLens", quit: "Выйти и остановить мониторинг", tooltip: "ThreatLens · мониторинг пользователя", alert: "ThreatLens · обнаружение", review: "требует проверки. Автоматического карантина нет." },
+        _ => NativeText { show: "Open ThreatLens", quit: "Exit and stop monitoring", tooltip: "ThreatLens · user-mode monitoring", alert: "ThreatLens · detection", review: "needs review. No automatic quarantine." },
     }
 }
 struct Engine {
@@ -264,7 +264,7 @@ fn startup_error(message: &str) {
     #[cfg(windows)] unsafe {
         #[link(name="user32")] extern "system" { fn MessageBoxW(window: *mut std::ffi::c_void, text: *const u16, caption: *const u16, flags: u32) -> i32; }
         let text: Vec<_> = message.encode_utf16().chain(Some(0)).collect();
-        let title: Vec<_> = "Aegis Security".encode_utf16().chain(Some(0)).collect();
+        let title: Vec<_> = "ThreatLens".encode_utf16().chain(Some(0)).collect();
         MessageBoxW(std::ptr::null_mut(), text.as_ptr(), title.as_ptr(), 0x10);
     }
 }

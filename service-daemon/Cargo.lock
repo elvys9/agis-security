@@ -13,40 +13,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "aegis-security"
-version = "0.1.1"
-dependencies = [
- "aes-gcm",
- "anyhow",
- "chrono",
- "crossbeam-channel",
- "dirs",
- "ed25519-dalek",
- "hex",
- "md-5",
- "notify",
- "rand 0.8.8",
- "reqwest",
- "serde",
- "serde_json",
- "sha2",
- "tempfile",
- "uuid",
- "walkdir",
- "windows-sys 0.59.0",
- "zeroize",
-]
-
-[[package]]
 name = "aegis-service"
 version = "0.1.0"
 dependencies = [
- "aegis-security",
  "anyhow",
  "crossbeam-channel",
  "notify",
  "serde",
  "serde_json",
+ "threatlens",
  "walkdir",
  "windows-service",
  "windows-sys 0.59.0",
@@ -1490,6 +1465,31 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.9",
+]
+
+[[package]]
+name = "threatlens"
+version = "0.1.2"
+dependencies = [
+ "aes-gcm",
+ "anyhow",
+ "chrono",
+ "crossbeam-channel",
+ "dirs",
+ "ed25519-dalek",
+ "hex",
+ "md-5",
+ "notify",
+ "rand 0.8.8",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
+ "uuid",
+ "walkdir",
+ "windows-sys 0.59.0",
+ "zeroize",
 ]
 
 [[package]]

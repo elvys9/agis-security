@@ -1,4 +1,4 @@
-# Windows distribution: Aegis Security 0.1.2 source
+# Windows distribution: ThreatLens 0.1.2 source
 
 This is an **unsigned prerelease**, not a certified antivirus or a public-production release. The supported packaging path is NSIS for Windows 10/11 x64. No installer is executed by the build workflow.
 
@@ -14,7 +14,7 @@ The wrapper first downloads and verifies the pinned local language model and Win
 
 ## Installation and privileges
 
-NSIS uses `perMachine`: UAC elevation is for setup/uninstall. The application executable must retain `asInvoker` and run as the signed-in standard user. Launch from the Start menu after setup when checking the runtime token. Setup creates common Desktop/Start menu shortcuts and HKLM Explorer actions for files and directories. Their command is `"<install-dir>\aegis-security.exe" --scan "%1"`; the executable and selected path are separately quoted. Windows 11 may show the classic shell action under **Show more options**. Uninstall removes these actions and shortcuts but preserves quarantined files.
+NSIS uses `perMachine`: UAC elevation is for setup/uninstall. The application executable must retain `asInvoker` and run as the signed-in standard user. Launch from the Start menu after setup when checking the runtime token. Setup creates common Desktop/Start menu shortcuts and HKLM Explorer actions for files and directories. Their command is `"<install-dir>\threatlens.exe" --scan "%1"`; the executable and selected path are separately quoted. Windows 11 may show the classic shell action under **Show more options**. Uninstall removes these actions and shortcuts but preserves quarantined files.
 
 The installer does not install/start a SYSTEM service, driver, scheduled elevated task, or autostart entry. Per-user autostart is an explicit application setting. Existing experimental service/driver sources are not silently elevated or installed.
 
